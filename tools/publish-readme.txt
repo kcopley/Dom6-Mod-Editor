@@ -5,7 +5,26 @@ An editor for Dominions 6 mod files (.dm): browse the game's own data and a mod'
 entity with real panels, build event chains, and save back without disturbing lines you
 didn't change.
 
-New in this build
+New in this build (fixes)
+- Mercenaries: the commander, unit and item a band offers are saved as names, as the game reads
+  them (#com "Militia"; "Militia (30)" when another monster has the same name). Picking one
+  wrote its number, which the game doesn't read: for a commander or unit it stops loading the
+  mod ("bad #com"). Merging mods writes them as names too.
+- Events: #1unit, #2com, #1d6units and the other commands named with a number add a line each,
+  as in the game (an event with nine #1unit lines showed one).
+- An event with more requirements (12) or effects (20) than the game keeps: the message says
+  which lines the game drops, and that lines without a number (#notext, #nolog,
+  #req_pop0ok, ...) take a slot too.
+- The report: lines outside any block (after a misspelt header such as #newevents) are listed:
+  the game skips them up to the next block. A number glued to its command (#school-1) is
+  pointed out. Every finding has its line.
+- Removing a weapon a unit got from a copy no longer changes the order of its other weapons.
+  Redo of a new unit: references to it by name work again.
+- Monsters: #3castbattlespell.
+- Sprites without transparency (24-bit TGA, PNG without alpha) show as in the game: black is
+  transparent, magenta a shadow.
+
+In 0.13.0
 - Merge mods: "Merge mods..." on the toolbar puts several mods into one new file, in the order
   the game would read them. Where two mods use the same number, the later one's entity moves
   to a free number and everything that refers to it follows (event codes, variables,

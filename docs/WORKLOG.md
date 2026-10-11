@@ -36,6 +36,15 @@ all that edits turn out right, so the author can edit his mods.
   block are a "goes wrong" finding; a number glued to its command (`#school-1`) isn't called
   ignored (the game reads `#school-1` as `#school -1`, its own branch; the generic handlers want
   a space). Editor tools pointed at the removed WPF project's paths: fixed.
+- **Too many requirements or effects** (the author, on 0.13.0: "where I put (exactly) 20
+  #killcom commands, the editor reads them as 22"): his count was off, not ours. Confluence's
+  five cleanup events have `#notext` and `#nolog` above 20 `#killcom`; both are effect pairs
+  (vanilla stores `#notext` 41 times, `#req_pop0ok` 212, `#req_indepok` 132), so the game keeps
+  18 kills. The message now names what counts and what's dropped, on the first dropped line:
+  "22 effects, #notext and #nolog included: the game keeps the first 20 in file order and drops
+  the last 2 (#killcom ×2)". Cataclysm's Inquisition event drops `#magicitem 9` and `#code 0`.
+- **Test build 0.13.1** (the user asked: "a new, 0.13.1 build, for the minor fixes"): Windows,
+  macOS (arm64, x64), Linux (x64, arm64) in publish/.
 - **Open:** the parser doesn't read a glued number (`#school-1`) as the game does for commands
   with their own branch (needs the exe's per-command handler, not in the catalog yet); a merge
   rewrites `#armor "Leather Hood` (no closing quote: the game reads nothing) as `#armor 121`;

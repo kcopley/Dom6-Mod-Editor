@@ -390,10 +390,8 @@ namespace Dom5Edit.Events
                         ? $"#delay plans event {e.ID + 1}, and there's no such event"
                         : "#delay plans the next #newevent, and this mod has none after this one (with other mods loaded, the game runs the next mod's first new event)", isError: e.Selected));
                 var (reqs, effs) = EventInfo.Slots(lines);
-                if (reqs > EventInfo.MaxRequirements)
-                    _problems.Add(new EventProblem(e, null, $"{reqs} requirements: the game keeps the first {EventInfo.MaxRequirements} and drops the rest", isError: true));
-                if (effs > EventInfo.MaxEffects)
-                    _problems.Add(new EventProblem(e, null, $"{effs} effects: the game keeps the first {EventInfo.MaxEffects} and drops the rest", isError: true));
+                Overflow(e, reqs, EventInfo.MaxRequirements, "requirements");
+                Overflow(e, effs, EventInfo.MaxEffects, "effects");
                 var msg = EventInfo.Message(lines);
                 if (msg != null && msg.Length > 2399 && lines.Any(p => p.Command == Command.MSG && _ownLines.Contains(p)))
                     _problems.Add(new EventProblem(e, null, $"The message is {msg.Length} characters: the game takes at most 2399", isError: true));
@@ -408,6 +406,32 @@ namespace Dom5Edit.Events
                 if (rarity == null && e.Selected == false)
                     _problems.Add(new EventProblem(e, null, "No #rarity: the game counts the event as a free slot, so the next #newevent takes it again and this one is lost", isError: true));
             }
+        }
+
+        /// <summary>
+        /// More lines than the list has slots: which the game drops (the problem's line is the
+        /// first), and the lines without an argument that count too (#notext, #nolog: easy to miss;
+        /// Confluence's 20 #killcom with both kill 18).
+        /// </summary>
+        private void Overflow(IDEntity e, List<Property> taken, int max, string what)
+        {
+            if (taken.Count <= max)
+                return;
+            var flags = taken.Where(p => GameData.GameCommandCatalog.EffectOf(EntityType.EVENT, p.Command)?.NoArgument == true)
+                .Select(p => EventInfo.Name(p.Command)).Distinct().ToList();
+            var dropped = taken.Skip(max).ToList();
+            // the dropped commands, a run of one as "#killcom ×2" (no values: the report groups alike messages)
+            var runs = new List<(string Name, int Count)>();
+            foreach (var name in dropped.Select(p => EventInfo.Name(p.Command)))
+                if (runs.Count > 0 && runs[^1].Name == name)
+                    runs[^1] = (name, runs[^1].Count + 1);
+                else
+                    runs.Add((name, 1));
+            var included = flags.Count == 0 ? ""
+                : ", " + (flags.Count == 1 ? flags[0] : string.Join(", ", flags.Take(flags.Count - 1)) + " and " + flags[^1]) + " included";
+            _problems.Add(new EventProblem(e, dropped[0],
+                $"{taken.Count} {what}{included}: the game keeps the first {max} in file order and drops the last {(dropped.Count == 1 ? "one" : dropped.Count)} " +
+                $"({string.Join(", ", runs.Select(r => r.Count > 1 ? $"{r.Name} ×{r.Count}" : r.Name))})", isError: true));
         }
 
         private static void AddTo<T>(Dictionary<long, List<T>> map, long key, T value)

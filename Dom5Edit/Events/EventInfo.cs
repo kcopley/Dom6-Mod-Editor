@@ -100,20 +100,23 @@ namespace Dom5Edit.Events
         public static bool IsRequirement(Command c) => Name(c).StartsWith("#req_");
 
         /// <summary>
-        /// How many requirement and effect slots these lines take in the game: a repeatable command
-        /// (the catalog: it adds) takes one per line; any other replaces its earlier line. #clear
-        /// empties both lists; #rarity and #msg aren't pairs.
+        /// The lines that take requirement and effect slots in the game, in the order they take
+        /// them (past the last slot, the game drops them): a repeatable command (the catalog: it
+        /// adds) takes one per line; any other replaces its earlier line's pair, in that slot.
+        /// #clear empties both lists; #rarity and #msg aren't pairs.
         /// </summary>
-        public static (int Requirements, int Effects) Slots(IEnumerable<Property> lines)
+        public static (List<Property> Requirements, List<Property> Effects) Slots(IEnumerable<Property> lines)
         {
             var once = new HashSet<Command>();
-            int req = 0, eff = 0;
+            var req = new List<Property>();
+            var eff = new List<Property>();
             foreach (var p in lines)
             {
                 if (p.Command == Command.CLEAR)
                 {
                     once.Clear();
-                    req = eff = 0;
+                    req.Clear();
+                    eff.Clear();
                     continue;
                 }
                 if (p.IsDisplayAsset || p.Command == Command.RARITY || p.Command == Command.MSG
@@ -123,10 +126,7 @@ namespace Dom5Edit.Events
                 bool repeats = effect != null && (effect.Add.Count > 0 || effect.Or.Count > 0);
                 if (!repeats && !once.Add(p.Command))
                     continue;
-                if (IsRequirement(p.Command))
-                    req++;
-                else
-                    eff++;
+                (IsRequirement(p.Command) ? req : eff).Add(p);
             }
             return (req, eff);
         }

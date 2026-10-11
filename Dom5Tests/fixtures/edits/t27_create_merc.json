@@ -1,5 +1,5 @@
 {
-  "description": "A mercenary band made in the editor on a mod that has none (the oracle numbers a band without a number \"\" and takes only one): its name, commander, units and terms.",
+  "description": "A mercenary band made in the editor on a mod that has none (the oracle numbers a band without a number \"\" and takes only one): its name, commander, units and terms. A band's #com, #unit and #item are written as names (the game reads only a quoted name there: Dominions6.exe's merc parser), so the oracle shows the name, lowercased.",
   "base": "base_edits.dm",
   "edits": [
     { "op": "create", "entity": "merc", "name": "Fresh Band", "as": "b" },
@@ -16,6 +16,6 @@
     { "op": "set", "entity": "merc", "ref": "b", "command": "#eramask", "value": "7" }
   ],
   "expect": [
-    { "type": "merc", "id": "", "new": { "name": "Fresh Band", "bossname": "Boss Fresh", "com": "7400", "unit": "7410", "nrunits": "15", "level": "1", "minmen": "5", "minpay": "90", "xp": "0", "randequip": "1", "recrate": "100", "eramask": "7" } }
+    { "type": "merc", "id": "", "new": { "name": "Fresh Band", "bossname": "Boss Fresh", "com": "template t", "unit": "two weapons", "nrunits": "15", "level": "1", "minmen": "5", "minpay": "90", "xp": "0", "randequip": "1", "recrate": "100", "eramask": "7" } }
   ]
 }

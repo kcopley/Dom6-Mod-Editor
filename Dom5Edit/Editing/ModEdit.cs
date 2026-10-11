@@ -69,13 +69,14 @@ namespace Dom5Edit.Editing
         {
             foreach (var e in _deleted)
                 _mod.Database[e.GetEntityType()].Remove(e);
-            foreach (var e in _created)
-                _mod.Database[e.GetEntityType()].Restore(e);
             foreach (var (entity, s) in _states)
             {
                 entity.RestoreProperties(s.After);
                 entity._name = s.NameAfter;
             }
+            // (after their lines are back: the set looks up an entity by the name they give it)
+            foreach (var e in _created)
+                _mod.Database[e.GetEntityType()].Restore(e);
             _changed(this);
         }
     }

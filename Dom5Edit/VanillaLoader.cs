@@ -171,7 +171,7 @@ namespace Dom5Edit
         /// </summary>
         Mod LoadVanillaFromDm()
         {
-            Mod m = new Mod();
+            Mod m = new Mod { IsGameData = true };
 
             string dmPath = FindVanillaDmPath();
             if (string.IsNullOrEmpty(dmPath) || !File.Exists(dmPath))

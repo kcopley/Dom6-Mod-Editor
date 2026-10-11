@@ -124,13 +124,16 @@ export function generateStress({ text, vanillaText, gameCommands = null, oracleC
 		e.lines.push(...b.lines);
 		e.blocks++;
 		e.byName ||= b.arg.id === undefined;
+		// a #new on a game entity's number (Cataclysm's #newweapon 825): the game replaces the
+		// entity, the oracle refuses the block, so it can't judge edits to it
+		e.newOnGame ||= b.how === 'new' && b.arg.id !== undefined && vanilla[b.type]?.[id] !== undefined;
 		own[b.type].set(id, e);
 	}
 	const isSource = (t, id) => sources[t]?.has(String(id));
 	const copiesOrClears = (e) => [...e.commands.keys()].some((c) => c.startsWith('copy') || c.startsWith('clear'));
 	// what an edit may target: the mod's new entities, vanilla ones it changes, vanilla ones it doesn't touch
 	function pools(t) {
-		const mine = [...(own[t]?.entries() || [])].filter(([id]) => base[t]?.[id] && !isSource(t, id));
+		const mine = [...(own[t]?.entries() || [])].filter(([id, e]) => base[t]?.[id] && !isSource(t, id) && !e.newOnGame);
 		const fresh = mine.filter(([, e]) => !e.vanilla).map(([id]) => id);
 		const selected = mine.filter(([id, e]) => e.vanilla && known[t]?.has(id)).map(([id]) => id);
 		const untouched = game(t).filter((id) => !own[t]?.has(id) && !isSource(t, id) && base[t]?.[id]);
@@ -460,12 +463,18 @@ export function generateStress({ text, vanillaText, gameCommands = null, oracleC
 		return true;
 	}
 
+	// a band's #com and #unit are names to the game (Dominions6.exe's merc parser): the editor
+	// writes the picked unit's name, which the oracle keeps lowercased. Units whose name finds
+	// them (the lowest number with it), else the editor writes "Name (id)", which the oracle can't
+	// resolve
+	const mercUnits = vanillaUnits.filter((u) => base.unit?.[u]?.name && names.unit?.get(String(base.unit[u].name).trim().toLowerCase()) === u);
 	function mercEdit(id) {
-		if (rand() < 0.3) {
+		if (rand() < 0.3 && mercUnits.length) {
 			const [command, field] = pick([['#com', 'com'], ['#unit', 'unit']]);
-			const u = pick(vanillaUnits);
-			if (String(value('merc', id, field)) === u || !claim('merc', id, field)) return false;
-			change('merc', id, field, u);
+			const u = pick(mercUnits);
+			const name = String(base.unit[u].name).trim().toLowerCase();
+			if (String(value('merc', id, field)) === name || !claim('merc', id, field)) return false;
+			change('merc', id, field, name);
 			edit('merc', id, { op: 'set', command, value: u }, 'change merc unit');
 			return true;
 		}

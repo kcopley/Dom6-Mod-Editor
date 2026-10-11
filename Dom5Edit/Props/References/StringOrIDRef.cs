@@ -147,6 +147,8 @@ namespace Dom5Edit.Props
                 ID = val;
                 IsStringRef = false;
                 Comment += remainder;
+                // a number picked in the editor for a line the game reads only as a name: saved as the name
+                _numberForName = NameOnly && Parent?.ParentMod?.IsLoaded == true;
             }
             else
             {
@@ -166,6 +168,16 @@ namespace Dom5Edit.Props
             Command.SPELL,
             Command.AUTOSPELL,
         };
+
+        /// <summary>
+        /// A mercenary band's #com, #unit and #item: the game reads them only as a quoted name (its
+        /// merc parser reads text there, Dominions6.exe 0x14023df70): "#com 5101" reads no name and
+        /// the game stops loading the mod ("bad #com, no monster called ''").
+        /// </summary>
+        private bool NameOnly => Parent is Mercenary;
+
+        // a number given in the editor where the game reads only a name (NameOnly): written as the name
+        private bool _numberForName;
 
         // the author wrote a name (a merge writes the number, and the name as its comment)
         private bool _writtenAsName;
@@ -192,6 +204,23 @@ namespace Dom5Edit.Props
             return _name;
         }
 
+        /// <summary>
+        /// The name to write. A mercenary's monster, "Name (id)" when the plain name would find
+        /// another monster first: the merc parser's lookup (Dominions6.exe 0x1402b7720) tries
+        /// "%s (%d)" against every monster, then the name ignoring case, lowest number first. A
+        /// name the author wrote finds what it found before, so it stays as written.
+        /// </summary>
+        private string GameName()
+        {
+            var name = ExportName();
+            if (!NameOnly || !Resolved || Entity == null || Entity.ID <= 0 || string.IsNullOrEmpty(name) || Entity.GetEntityType() != EntityType.MONSTER)
+                return name;
+            var mod = Parent?.ParentMod;
+            if (mod == null || !mod.TryGet(EntityType.MONSTER, 0, name, out var found) || found.ID == Entity.ID)
+                return name;
+            return $"{name} ({Entity.ID})";
+        }
+
         public override string ToExportString()
         {
             if (!CommandsMap.TryGetString(Command, out string s)) return "";
@@ -200,21 +229,21 @@ namespace Dom5Edit.Props
             string? nameNote = null;
             if (Parent?.ParentMod?.KeepReferenceForms == false)
             {
-                if (_writtenAsName && Entity != null && Entity.ID != -1 && !_StringExported.Contains(Command) && string.IsNullOrEmpty(Comment))
+                if (_writtenAsName && Entity != null && Entity.ID != -1 && !_StringExported.Contains(Command) && !NameOnly && string.IsNullOrEmpty(Comment))
                     nameNote = ExportName();
                 // a merge: by number where there is one
                 if (Entity != null && Entity.ID != -1)
                     IsStringRef = false;
 
-                if (_StringExported.Contains(Command))
+                if (_StringExported.Contains(Command) || NameOnly)
                 {
                     IsStringRef = true;
                 }
             }
 
-            if (IsStringRef)
+            if (IsStringRef || _numberForName && Resolved && Entity != null)
             {
-                string _exportName = ExportName();
+                string _exportName = GameName();
 
                 if (!String.IsNullOrEmpty(Comment))
                 {

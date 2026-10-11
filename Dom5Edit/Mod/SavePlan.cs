@@ -88,7 +88,10 @@ namespace Dom5Edit
                         Add(_inSlot, after, p);
                         continue;
                     }
-                    var gap = removed.FirstOrDefault(r => r.Command == p.Command);
+                    // (a line added back after a clear stays before the entity's own lines: in a removed
+                    // own line's place it would come after the ones before that, and change their order)
+                    var gap = p.PlaceFirst && !Resolve.GameRules.IsCopy(p.Command) && !Resolve.GameRules.IsClear(p.Command)
+                        ? null : removed.FirstOrDefault(r => r.Command == p.Command);
                     if (gap != null)
                         Add(_inSlot, gap, p);
                     else if (p.PlaceFirst)

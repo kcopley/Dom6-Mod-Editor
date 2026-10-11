@@ -17,10 +17,11 @@
 //      undo all / redo all byte for byte.
 //
 // Usage: node tools/fidelity/run.mjs [--oracle DIR] [--stages 1,3,4,5,6] [--only TEXT] [--quick]
-//                                    [--stress] [--seed N] [--stress-size N] [--jobs N]
+//                                    [--stress] [--seed N] [--stress-size N] [--stress-mod FILE.dm] [--jobs N]
 //                                    [--update-baselines] [--json summary.json]
 // --quick = stages 3-4 (about 1-2 min); the default runs all stages (~15 min); --stress = stage 5
-// only. Checks run --jobs at a time (default: half the cores, at most 6).
+// only; --stress-mod FILE.dm (repeatable) stresses that mod instead of suite.json's (a workshop mod,
+// say; its saves stay in the work folder). Checks run --jobs at a time (default: half the cores, at most 6).
 // Needs: Node 18+, a built Dom5Tests (Dom5Tests/bin/Debug/net8.0), and a checkout of the
 // kcopley/dom6inspector fork (branch export-test). Exit 0 = no failures.
 import fs from 'node:fs';
@@ -39,7 +40,7 @@ const WORK = path.join(ROOT, 'Dom5Tests/bin/fidelity');
 // --- arguments & environment -------------------------------------------------
 const opt = {
 	stages: null, only: null, quick: false, update: false, json: null, oracle: process.env.DOM6INSPECTOR || null,
-	stress: false, seed: null, stressSize: null, jobs: Math.max(1, Math.min(6, Math.floor(os.cpus().length / 2))),
+	stress: false, seed: null, stressSize: null, stressMods: [], jobs: Math.max(1, Math.min(6, Math.floor(os.cpus().length / 2))),
 };
 for (let i = 2; i < process.argv.length; i++) {
 	const a = process.argv[i];
@@ -50,6 +51,7 @@ for (let i = 2; i < process.argv.length; i++) {
 	else if (a === '--stress') opt.stress = true;
 	else if (a === '--seed') opt.seed = Number(process.argv[++i]);
 	else if (a === '--stress-size') opt.stressSize = Number(process.argv[++i]);
+	else if (a === '--stress-mod') { opt.stressMods.push(path.resolve(process.argv[++i])); opt.stress = true; }
 	else if (a === '--jobs') opt.jobs = Math.max(1, Number(process.argv[++i]));
 	else if (a === '--update-baselines') opt.update = true;
 	else if (a === '--json') opt.json = process.argv[++i];
@@ -405,8 +407,11 @@ if (opt.stages.includes(5)) {
 	const oracleCommands = Object.fromEntries(TYPES.map((t) => [t, new Set(Object.keys(modctx[t + 'commands'] || {}))]));
 	const empty = path.join(WORK, 'empty.dm');
 	fs.writeFileSync(empty, '#modname "empty"\n#description "vanilla only (fidelity stress: which entities are the game\'s)"\n');
-	await runChecks(cfg.mods.filter((m) => fs.existsSync(path.join(ROOT, m.path)) && (!opt.only || m.name.includes(opt.only))).map((m) => new Check(5, `${m.name} (seed ${seed})`, async (check) => {
-		const abs = path.join(ROOT, m.path);
+	const stressMods = opt.stressMods.length
+		? opt.stressMods.map((p) => ({ name: path.basename(p, '.dm').replace(/[^\w.-]+/g, '_'), path: p }))
+		: cfg.mods;
+	await runChecks(stressMods.filter((m) => fs.existsSync(path.resolve(ROOT, m.path)) && (!opt.only || m.name.includes(opt.only))).map((m) => new Check(5, `${m.name} (seed ${seed})`, async (check) => {
+		const abs = path.resolve(ROOT, m.path);
 		const save = await dom5Save(abs, m.name);
 		const [base, vanilla] = await Promise.all([snapshot(save), snapshot(empty)]);
 		const gen = generateStress({ text: fs.readFileSync(abs, 'utf8'), vanillaText: fs.readFileSync(path.join(ROOT, 'vanilla.dm'), 'utf8'), gameCommands, oracleCommands, base: base.snap, vanilla: vanilla.snap, seed, size });

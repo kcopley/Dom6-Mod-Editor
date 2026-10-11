@@ -41,6 +41,7 @@ for CI by `tools/fidelity/oracle-ref.txt`.
 node tools/fidelity/run.mjs --quick          # stages 3, 4 and 6's fixture merges, ~2 min: the everyday loop
 node tools/fidelity/run.mjs                  # all stages (stage 1 is slow, see below)
 node tools/fidelity/run.mjs --stress         # stage 5 alone (~1 min); --seed N for another set of edits
+node tools/fidelity/run.mjs --stress-mod MOD.dm   # stage 5 on any mod (repeatable), instead of suite.json's
 node tools/fidelity/run.mjs --only e04       # a single case (substring match)
 node tools/fidelity/run.mjs --update-baselines   # accept current counts as the new baseline
 ```

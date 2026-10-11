@@ -71,7 +71,11 @@ header is rewritten when its entity's number changed (`ModExporter.KeepsHeader`)
   name kept as a comment. Which commands take only names comes from the exe's reading rules
   (`dmread-6.37.json`: no numeric format). Selects by name become selects by number where there is
   one. Only a name-only reference whose name would find another entity in the merged file gets
-  its target renamed with a suffix, as a last resort, and the report says so.
+  its target renamed with a suffix, as a last resort, and the report says so. A mercenary band's
+  `#com`, `#unit` and `#item` are text to the game (its merc parser reads a quoted string: a
+  number reads nothing and the game stops, "bad #com"): written as names, a monster as
+  `"Name (id)"` where the plain name would find another one first (2026-10-11; before, a merge
+  wrote them as numbers).
 - **One file**: a merged header (`#modname`, a description listing the parts and their versions),
   then each part in its own order with its comments, behind a banner line; unchanged lines as
   written, lines rewritten only where numbers or names changed. Sprites and other files a part

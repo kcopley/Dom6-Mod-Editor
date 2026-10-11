@@ -1,5 +1,5 @@
 {
-  "description": "Mercenaries (#newmerc has no number: the edits name the mod's first band by index 0; the oracle numbers it \"\"): size, pay, name, commander changed to another mod unit, a second item added (the game keeps up to 4; the oracle keeps only the last as item, so the list is re-read). A game band can't be changed (there is no #selectmerc): the editor refuses.",
+  "description": "Mercenaries (#newmerc has no number: the edits name the mod's first band by index 0; the oracle numbers it \"\"): size, pay, name, commander changed to another mod unit, a second item added (the game keeps up to 4; the oracle keeps only the last as item, so the list is re-read). A game band can't be changed (there is no #selectmerc): the editor refuses. A band's #com, #unit and #item are written as names (the game reads only a quoted name there: Dominions6.exe's merc parser), so the oracle shows the name, lowercased.",
   "base": "base_types.dm",
   "edits": [
     { "op": "set", "entity": "merc", "index": 0, "command": "#nrunits", "value": "25" },
@@ -13,8 +13,8 @@
     { "type": "merc", "id": "", "field": "nrunits", "from": "20", "to": "25" },
     { "type": "merc", "id": "", "field": "minpay", "from": "100", "to": "150" },
     { "type": "merc", "id": "", "field": "name", "from": "Test Band", "to": "Renamed Band" },
-    { "type": "merc", "id": "", "field": "com", "from": "5106", "to": "5101" },
-    { "type": "merc", "id": "", "field": "item", "from": "1", "to": "10" }
+    { "type": "merc", "id": "", "field": "com", "from": "5106", "to": "test corider" },
+    { "type": "merc", "id": "", "field": "item", "from": "1", "to": "burning blade" }
   ],
   "reread": [
     { "entity": "merc", "index": 0, "command": "#item", "values": ["1", "10"] },

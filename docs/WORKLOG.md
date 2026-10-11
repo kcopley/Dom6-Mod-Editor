@@ -3,6 +3,45 @@
 Running log of the autonomous work sessions: what was done, what was found, what's next.
 Newest entries at the top. Commits are local unless noted; the user pushes.
 
+## 2026-10-11: the Legendary mods (six event-heavy mods by one author), edits checked end to end
+
+The user added six "Legendary" mods (Cataclysm, Dwellings, Guildmasters, Sellswords, Sites,
+Vendors: 1,331 events, 723 monsters, 93 mercenaries) and asked to test the editor on them, above
+all that edits turn out right, so the author can edit his mods.
+
+- **As found:** every mod loads, every page opens (`--sweep 0`: 2,769 pages, 0 failed), an
+  unedited save is byte-identical. Stress edits (`run.mjs --stress-mod FILE`, new): 4 of 6 passed.
+- **Mercenaries:** the band's `#com`, `#unit` and `#item` are text to the game (merc parser
+  0x14023df70 reads a quoted string; a number reads nothing and the game stops: "bad #com, no
+  monster called ''", the error routine exits). The page's pickers wrote numbers, and a merge
+  wrote every band's references as numbers (106 lines in the six-mod merge). Now written as the
+  target's name, `"Name (id)"` when the plain name finds another monster first (the lookup
+  0x1402b7720 tries `"%s (%d)"`, then the name ignoring case, lowest number); the resolver reads
+  that form. An author's numeric line is kept and reported. Sellswords tells three commanders
+  apart by trailing spaces ("Bringer of Gifts", "... ", "...  "), which the game honours: kept.
+- **Digit-named event commands** (`#1unit`, `#2com`, `#1d6units`-`#16d6units`, `#1d3vis`, ...):
+  the catalog's name pattern skipped them, so the editor took them as "last line wins": an event
+  with nine `#1unit` lines showed one unit, and the 20-effect limit didn't count them. All 30
+  append (generic handler kind 10/11). The catalog, the referee's rules, commands-6.37.json, the
+  6.37 snapshot and vanilla.dm are regenerated: pure additions, plus `#3castbattlespell` (a
+  documented monster command the parser lacked; one vanilla monster has it). New findings: three
+  events with 22-23 effects (the game drops past 20).
+- **Weapon order:** removing an inherited weapon put the kept ones back in the removed own line's
+  place, after the unit's own weapons (SavePlan rule 1 before rule 2). A line added back after a
+  clear now always goes before the entity's own lines.
+- **Redo:** a re-created entity went back into the name index before its `#name` did.
+- **Report:** findings about a whole entity (its number) had no line; command names with digits or
+  a dash were cut (`#1com` showed as an empty name); `#newevents` (a typo: the event after it is
+  outside any block and lost) now says "did you mean `#newevent`?" and the lines outside any
+  block are a "goes wrong" finding; a number glued to its command (`#school-1`) isn't called
+  ignored (the game reads `#school-1` as `#school -1`, its own branch; the generic handlers want
+  a space). Editor tools pointed at the removed WPF project's paths: fixed.
+- **Open:** the parser doesn't read a glued number (`#school-1`) as the game does for commands
+  with their own branch (needs the exe's per-command handler, not in the catalog yet); a merge
+  rewrites `#armor "Leather Hood` (no closing quote: the game reads nothing) as `#armor 121`;
+  the inspector rejects `#newweapon` on a game weapon's number and reads `#newevents` as
+  `#newevent` (its limits, not ours: the referee agrees with our saves).
+
 ## 2026-10-07 (last): spells the game doesn't handle, Merge mods..., the change log, 0.13.0
 
 The user asked whether combat effects 1000-9999 really do nothing ("are you sure?"), whether the

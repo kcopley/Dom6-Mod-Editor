@@ -50,9 +50,15 @@ namespace Dom5Edit.Validation
             {
                 // quoted lines are left out
             }
-            Line At(int? line, IDEntity? entity = null) => new Line(line is int n && n > 0 ? n : null,
-                line is int k && k >= 1 && k <= lines.Length ? lines[k - 1].Trim() : "",
-                entity ?? (line is int m && m > 0 ? mod.EntityAt(m) : null));
+            Line At(int? line, IDEntity? entity = null)
+            {
+                // a finding about a whole entity (its number, ...): its block's first line
+                if ((line is not int given || given <= 0) && entity != null)
+                    line = mod.SourceBlocks.FirstOrDefault(b => ReferenceEquals(b.Entity, entity))?.HeaderLine;
+                return new Line(line is int n && n > 0 ? n : null,
+                    line is int k && k >= 1 && k <= lines.Length ? lines[k - 1].Trim() : "",
+                    entity ?? (line is int m && m > 0 ? mod.EntityAt(m) : null));
+            }
 
             var wrong = new List<Item>();
             var ignored = new List<Item>();
@@ -72,9 +78,19 @@ namespace Dom5Edit.Validation
                 }
                 if (p.IssueType != ParseIssueType.InvalidCommand && p.IssueType != ParseIssueType.NotReadByGame)
                     continue;
-                var command = Regex.Match(p.Message ?? "", @"#[A-Za-z_][A-Za-z0-9_]*").Value;
+                // (the whole word as written: #1com, #school-1)
+                var command = Regex.Match(p.Message ?? "", @"#[^\s'""]+").Value;
                 var typeName = Regex.Match(p.Message ?? "", @"for:? ([A-Z][a-z]+)").Groups[1].Value;
                 Enum.TryParse<EntityType>(typeName, true, out var type);
+                // a number glued to a command of this type ("#school-1"): which commands the game reads
+                // that way isn't known to the editor (tools/dom6exe/README.md "Commands"), so it isn't called ignored
+                var glued = Regex.Match(command, @"^#([A-Za-z0-9_]+)([-+]\d.*)$"); // (the game's matcher wants no letter or digit after the name)
+                if (glued.Success && typeName.Length > 0 && GameCommandCatalog.CommandsOf(type).Contains(glued.Groups[1].Value))
+                {
+                    look.Add(new Item(At(p.LineNumber), $"`{command}` has no space before its number: the editor reads it as an unknown line " +
+                        $"(the game reads some commands this way, others not); written `#{glued.Groups[1].Value} {glued.Groups[2].Value}`, both read it"));
+                    continue;
+                }
                 ignored.Add(new Item(At(p.LineNumber), IgnoredWhy(command, type, typeName)));
             }
 
@@ -237,7 +253,8 @@ namespace Dom5Edit.Validation
                 {
                     sb.AppendLine($"- {g.Text}");
                     foreach (var l in g.Lines.Take(shown))
-                        sb.AppendLine(l.Number is int n ? $"  - line {n}: `{Trim(l.Text)}`" : $"  - {Trim(l.Text)}");
+                        sb.AppendLine(l.Number is int n ? $"  - line {n}: `{Trim(l.Text)}`"
+                            : $"  - {(l.Text.Length > 0 ? Trim(l.Text) : l.Entity != null ? $"{l.Entity.GetEntityType().ToString().ToLowerInvariant()} {l.Entity.Name ?? "#" + l.Entity.ID}" : "(no line)")}");
                     if (g.Lines.Count > shown)
                         sb.AppendLine($"  - and {g.Lines.Count - shown} more");
                 }
@@ -256,7 +273,14 @@ namespace Dom5Edit.Validation
         private static string IgnoredWhy(string command, EntityType type, string typeName)
         {
             var name = command.TrimStart('#').ToLowerInvariant();
-            var kind = typeName.Length > 0 ? typeName.ToLowerInvariant() : "this";
+            if (typeName.Length == 0)
+            {
+                // outside a block: only a block's header or a mod-level command is read there
+                var outside = Suggest(name, BlockHeaders);
+                return outside.Length > 0 ? $"`{command}` isn't a Dominions 6 command" + outside + " (as written, the block after it has no header)"
+                    : $"`{command}` isn't a Dominions 6 command (outside a block, maybe one from an older version)";
+            }
+            var kind = typeName.ToLowerInvariant();
             var read = GameCommandCatalog.CommandsOf(type);
             var others = GameCommandCatalog.ContextsReading(name).ToList();
             if (others.Count > 0)
@@ -268,6 +292,14 @@ namespace Dom5Edit.Validation
             return meant.Length > 0 ? $"`{command}` isn't a Dominions 6 command" + meant
                 : $"`{command}` isn't a Dominions 6 command for {A(kind)} {kind} (maybe one from an older version)";
         }
+
+        // the commands that start a block (#newevent, #newmerc, ... aren't in the catalog's top level)
+        private static readonly string[] BlockHeaders =
+        {
+            "newmonster", "selectmonster", "newweapon", "selectweapon", "newarmor", "selectarmor", "newitem", "selectitem",
+            "newspell", "selectspell", "newsite", "selectsite", "newnation", "selectnation", "newevent", "selectevent", "newmerc",
+            "selectnametype", "selectpoptype", "selectbless", "newtemplate", "selectsound",
+        };
 
         /// <summary>"; did you mean #x?" for the closest command the game reads here (one or two typos away), or "".</summary>
         private static string Suggest(string name, IReadOnlyCollection<string> candidates)
@@ -281,7 +313,8 @@ namespace Dom5Edit.Validation
                 if (Math.Abs(c.Length - name.Length) > 2)
                     continue;
                 int d = Distance(name, c);
-                if (d < best)
+                // (on a tie, the one inside what was typed: #1com meant #com, not #2com)
+                if (d < best || d == best && meant != null && name.Contains(c) && !name.Contains(meant))
                 {
                     best = d;
                     meant = c;

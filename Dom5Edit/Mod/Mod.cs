@@ -169,9 +169,32 @@ namespace Dom5Edit
             // an entity is the one its first #new made, which later #selects change
             if (TryGetByID(t, i, out entity))
                 return true;
+            // "Name (id)": the game's monster lookup takes that form first (Dominions6.exe
+            // 0x1402b7720 compares "%s (%d)" with each monster's name and number)
+            if (t == EntityType.MONSTER && TryGetNamedWithId(s, out entity))
+                return true;
             // By name: when vanilla and mods share a name, the game takes the lowest ID
             entity = LowestNamed(t, s);
             return entity != null;
+        }
+
+        private static readonly System.Text.RegularExpressions.Regex NameWithId = new(@"^(.*) \((\d+)\)$");
+
+        private bool TryGetNamedWithId(string s, out IDEntity entity)
+        {
+            entity = null;
+            var m = NameWithId.Match(s ?? "");
+            if (!m.Success || !int.TryParse(m.Groups[2].Value, out var id) || !TryGetByID(EntityType.MONSTER, id, out var found))
+                return false;
+            // its name in game: the last mod's #name over the game's (compared as the game does, case and all)
+            string name = null;
+            foreach (var layer in Dependencies.Append(this))
+                if (layer.Database[EntityType.MONSTER].TryGetValue(id, out var e) && !string.IsNullOrEmpty(e.Name))
+                    name = e.Name;
+            if (name != m.Groups[1].Value)
+                return false;
+            entity = found;
+            return true;
         }
 
         private bool TryGetByID(EntityType t, int i, out IDEntity entity)
@@ -284,6 +307,9 @@ namespace Dom5Edit
 
         private string _currentRawText = "";
 
+        // lines outside any block were noted since the last block's header
+        private bool _outsideNoted;
+
         // the line with several commands the current one came from, by the parser's number for it
         private LineGroup? _currentLineGroup;
         private readonly Dictionary<int, LineGroup> _lineGroups = new Dictionary<int, LineGroup>();
@@ -321,6 +347,9 @@ namespace Dom5Edit
         public bool KeepReferenceForms { get; set; } = true;
 
         public bool LineWasTrimmed { get; set; }
+
+        /// <summary>The game's own data (vanilla.dm, written from the exe): no notes for an author.</summary>
+        public bool IsGameData { get; set; }
 
         public Mod()
         {
@@ -462,6 +491,16 @@ namespace Dom5Edit
                 AddParseIssue(ParseIssueType.GameReadsDifferently, $"The event before this line has no #end: the game ignores this {header}, so the lines after it go to that event (two events become one)");
             else
                 AddParseIssue(ParseIssueType.Warning, $"The {kind} block before this line has no #end: the game keeps it open to the next #end, so {kind} commands until then go to it");
+        }
+
+        // a mercenary's #com, #unit and #item are text to the game (its merc parser, Dominions6.exe
+        // 0x14023df70): with no opening quote on the line it reads no name
+        private void NoteMercWithoutName(Command c)
+        {
+            CommandsMap.TryGetString(c, out var name);
+            AddParseIssue(ParseIssueType.GameReadsDifferently, c == Command.ITEM
+                ? $"A mercenary's {name} takes only an item name in quotes: the game reads no name here, so the band gets no item"
+                : $"A mercenary's {name} takes only a monster name in quotes: the game reads no name here and stops loading the mod (\"bad {name}, no monster called ''\")");
         }
 
         /// <summary>The file's line break as read ("\r\n" or "\n"), or null for a mod made in the editor.</summary>
@@ -675,6 +714,17 @@ namespace Dom5Edit
                     break;
                 default:
                     if (_currentEntity != null) _currentEntity.Parse(c, val, comment); //assume the command is relevant for the current entity
+                    if (_currentEntity == null && !_outsideNoted && !IsGameData && Dom5Edit.GameData.GameCommandCatalog.GameVersion != null
+                        && CommandsMap.TryGetString(c, out var outside) && !Dom5Edit.GameData.GameCommandCatalog.IsModLevel(outside.TrimStart('#')))
+                    {
+                        // (once per run of such lines: the next block's header ends it)
+                        _outsideNoted = true;
+                        AddParseIssue(ParseIssueType.GameReadsDifferently, $"{outside} is outside any block (no #new... or #select... line since the last #end): "
+                            + "the game ignores it and the lines after it up to the next block (a header missing or misspelt above?)");
+                    }
+                    if (!IsGameData && _currentEntity is Mercenary && (c == Command.COM || c == Command.UNIT || c == Command.ITEM)
+                        && !System.Text.RegularExpressions.Regex.IsMatch(_currentRawText, @"^\s*#\w+[ \t]+"""))
+                        NoteMercWithoutName(c);
                     if (_currentBlock != null && _currentEntity is IDEntity parsedInto && parsedInto.LastParsedProperty != null)
                     {
                         parsedInto.LastParsedProperty.RawText = _currentRawText;
@@ -706,6 +756,7 @@ namespace Dom5Edit
                     IdAtParse = blockEntity.ID,
                     HeaderLine = LineNumber,
                 };
+                _outsideNoted = false;
                 _currentBlock.LeadingTrivia.AddRange(_pendingTrivia);
                 _pendingTrivia.Clear();
                 SourceBlocks.Add(_currentBlock);

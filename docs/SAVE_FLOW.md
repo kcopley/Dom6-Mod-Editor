@@ -89,7 +89,9 @@ an undoable `IModEdit` (snapshots of the touched entities' lists). Older code pa
 
 **Placement of an added property** (one with no block; `SavePlan`, shared by the save and the
 resolver, so what the editor shows is what the file says):
-1. If an edit removed a block property of the same command from this entity, put it there.
+1. If an edit removed a block property of the same command from this entity, put it there
+   (not a line added back after a clear, rule 2: in a removed own line's place it would follow
+   the entity's lines before that one and change their order, e.g. a copied unit's weapons).
 2. An added copy or clear line, and lines added back after one (removing an inherited entry
    rewrites its group: `Property.PlaceFirst`), go **before the entity's own lines**: right after
    the last copy or clear line of its blocks that touches the same group, else right after the

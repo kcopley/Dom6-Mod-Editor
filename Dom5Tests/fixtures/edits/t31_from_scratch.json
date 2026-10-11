@@ -1,5 +1,5 @@
 {
-  "description": "A mod made from scratch in the editor (the base has no entities, so the save has no blocks to follow: every entity is written whole): a weapon and an armor, a mount and a rider using them, an item with the weapon, a summoning spell for the rider, a site recruiting it, a nation recruiting it with the site, a band of them, an event making them; a vanilla unit changed (copy-on-write). Each must be one new entity with its values and references; undo all must give back the empty mod.",
+  "description": "A mod made from scratch in the editor (the base has no entities, so the save has no blocks to follow: every entity is written whole): a weapon and an armor, a mount and a rider using them, an item with the weapon, a summoning spell for the rider, a site recruiting it, a nation recruiting it with the site, a band of them, an event making them; a vanilla unit changed (copy-on-write). Each must be one new entity with its values and references; undo all must give back the empty mod. A band's #com, #unit and #item are written as names (the game reads only a quoted name there: Dominions6.exe's merc parser), so the oracle shows the name, lowercased.",
   "base": "base_empty.dm",
   "edits": [
     { "op": "create", "entity": "weapon", "name": "Scratch Lance", "as": "w" },
@@ -50,7 +50,7 @@
     { "type": "spell", "ref": "sp", "new": { "name": "Scratch Summoning", "effect": "10001", "damage": "@rider", "researchlevel": "3" } },
     { "type": "site", "ref": "s", "new": { "name": "Scratch Keep", "level": "1", "hmon": ["@rider"] } },
     { "type": "nation", "ref": "n", "new": { "name": "Scratchland", "era": "2", "units": ["@rider"], "sites": ["@s"] } },
-    { "type": "merc", "id": "", "new": { "name": "Scratch Band", "com": "@rider", "unit": "@mount", "nrunits": "10" } },
+    { "type": "merc", "id": "", "new": { "name": "Scratch Band", "com": "scratch knight", "unit": "scratch horse", "nrunits": "10" } },
     { "type": "event", "id": "3302", "new": { "rarity": "1", "description": "Knights arrive.", "com": "@rider" } },
     { "type": "unit", "id": "3", "field": "mountmnr", "from": "3536", "to": "@mount" }
   ]

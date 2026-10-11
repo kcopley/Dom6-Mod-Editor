@@ -3,7 +3,7 @@
 Hover hints for every mod command, from Illwinter's manuals: per entity type (the manual's
 chapters), each command's arguments, its description, and the value table printed with it
 (magic path numbers, gem types, rarities, ...). The editor shows these as tooltips
-(Dom5Editor/Data/command_hints.json, read by Data/CommandHints.cs).
+(Dom5Editor.Core/Data/command_hints.json, read by Data/CommandHints.cs).
 
 The manuals' two columns are read in order by tools/manual_text.py (the older extraction in
 docs/pdf_extracted ran them together, which garbled many descriptions).
@@ -178,7 +178,7 @@ def main():
                 continue
         by_type[b['command']] = entry
 
-    out = os.path.join(ROOT, 'Dom5Editor', 'Data', 'command_hints.json')
+    out = os.path.join(ROOT, 'Dom5Editor.Core', 'Data', 'command_hints.json')
     with open(out, 'w', encoding='utf-8') as f:
         json.dump({'source': 'Illwinter: Dominions 6 Modding Manual (6.33) and Event Modding Manual (6.29); tools/command_hints.py',
                    'types': hints}, f, indent=1, ensure_ascii=False, sort_keys=True)

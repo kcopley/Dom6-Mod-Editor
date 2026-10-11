@@ -3,7 +3,7 @@
 (Dom5Edit/GameData, from tools/dom6exe).
 
 Every command the game reads is editable on an entity page: as a badge (a JSON badge section,
-Dom5Editor/Data/*_badges.json), in a panel (Dom5Editor/UI/ViewModels/EntityPages.cs: commands a
+Dom5Editor.Core/Data/*_badges.json), in a panel (Dom5Editor.Core/UI/ViewModels/EntityPages.cs: commands a
 type's page covers), or as text in the page's "other lines". This counts the commands that only
 "other lines" offers (editable, but as raw arguments): the ones worth a badge or a panel.
 
@@ -39,13 +39,13 @@ def main():
     top = set(catalog['top'])
     src = open(os.path.join(ROOT, 'Dom5Edit/Commands/Command.cs'), encoding='utf-8-sig').read()
     name_of = {m.group(2): m.group(1) for m in re.finditer(r'_commandMap\.Add\("#([a-z0-9_]+)", Command\.(\w+)\)', src)}
-    pages = open(os.path.join(ROOT, 'Dom5Editor/UI/ViewModels/EntityPages.cs'), encoding='utf-8-sig').read()
+    pages = open(os.path.join(ROOT, 'Dom5Editor.Core/UI/ViewModels/EntityPages.cs'), encoding='utf-8-sig').read()
     show_missing = '--missing' in sys.argv
     print('%-9s %6s %8s %8s %11s' % ('type', 'game', 'badges', 'panels', 'text only'))
     for ctx, badge_stem, cls in TYPES:
         game = set(catalog['contexts'].get(ctx, {}).get('commands', [])) - top - STRUCTURAL
         badges = set()
-        path = os.path.join(ROOT, 'Dom5Editor/Data/%s_badges.json' % badge_stem)
+        path = os.path.join(ROOT, 'Dom5Editor.Core/Data/%s_badges.json' % badge_stem)
         if os.path.exists(path):
             for section in json.load(open(path, encoding='utf-8-sig'))['sections']:
                 badges |= {c['name'].lstrip('#') for c in section['commands']}

@@ -29,7 +29,7 @@ MANUAL = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'd
 # a vanilla message three consecutive events share (6.37: events 8, 9, 10)
 CHECK_MESSAGE = b'A prospector genius has found a small gold deposit.'
 # commands the event parser compares by name whose names start with a digit (#2com, #1d6vis,
-# #1unit, #3d6units): dom6exe's IDENT pattern skips them
+# #1unit, #3d6units); dom6exe's IDENT pattern takes them since 2026-10-11
 DIGIT_NAME = re.compile(r'[0-9][a-z0-9_]*$')
 # Names the game itself gives codes, as hints for codes no command writes: (list, a string the
 # function loads, the name's pattern). The debug describers print an event as "rare 25,

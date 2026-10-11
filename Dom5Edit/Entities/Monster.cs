@@ -449,6 +449,7 @@ namespace Dom5Edit.Entities
             _propertyMap.Add(Command.CARCASSCOLLECTOR, IntProperty.Create);
             _propertyMap.Add(Command.BONUSSPELLS, IntProperty.Create);
             _propertyMap.Add(Command.ONEBATTLESPELL, SpellRef.Create);
+            _propertyMap.Add(Command.ZZ3CASTBATTLESPELL, SpellRef.Create); // like #onebattlespell, with three of the monster on the field
             _propertyMap.Add(Command.CROSSBREEDER, IntProperty.Create);
             _propertyMap.Add(Command.DEATHBANISH, IntProperty.Create);
             _propertyMap.Add(Command.KOKYTOSRET, IntProperty.Create);

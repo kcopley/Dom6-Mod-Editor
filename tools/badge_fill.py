@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Adds a badge for every command the game reads that no badge section or page panel shows yet
 (the "text only" commands tools/editor_coverage.py lists), to a "more" section at the end of the
-type's badge file (Dom5Editor/Data/<type>_badges.json). The badge's kind comes from the entity's
+type's badge file (Dom5Editor.Core/Data/<type>_badges.json). The badge's kind comes from the entity's
 property map (Dom5Edit/Entities/<Type>.cs: a flag, a number, a reference to a monster/weapon/...),
 its description from the manual (docs/pdf_extracted/commands_by_entity_clean.json).
 
@@ -40,14 +40,14 @@ def main():
     src = open(os.path.join(ROOT, 'Dom5Edit/Commands/Command.cs'), encoding='utf-8-sig').read()
     name_of = {m.group(2): m.group(1) for m in re.finditer(r'_commandMap\.Add\("#([a-z0-9_]+)", Command\.(\w+)\)', src)}
     manual = json.load(open(os.path.join(ROOT, 'docs/pdf_extracted/commands_by_entity_clean.json')))
-    pages = open(os.path.join(ROOT, 'Dom5Editor/UI/ViewModels/EntityPages.cs'), encoding='utf-8-sig').read()
+    pages = open(os.path.join(ROOT, 'Dom5Editor.Core/UI/ViewModels/EntityPages.cs'), encoding='utf-8-sig').read()
     for ctx, (stem, cls, section) in FILES.items():
         entity_src = open(os.path.join(ROOT, 'Dom5Edit/Entities/%s.cs' % cls), encoding='utf-8-sig').read()
         prop = {name_of[c]: k for c, k in re.findall(r'_propertyMap\.Add\(Command\.(\w+), *(\w+)\.Create', entity_src) if c in name_of}
         descr = {}
         for entry in manual.get(section, []):
             descr.setdefault(entry['name'].lstrip('#'), entry.get('description') or '')
-        path = os.path.join(ROOT, 'Dom5Editor/Data/%s_badges.json' % stem)
+        path = os.path.join(ROOT, 'Dom5Editor.Core/Data/%s_badges.json' % stem)
         raw = open(path, 'rb').read()
         bom = raw.startswith(b'\xef\xbb\xbf')
         config = json.loads(raw.decode('utf-8-sig'))

@@ -5,14 +5,14 @@ page reads "Movement", "Stealth & assassination", "Combat", ... instead of a lon
 list. Each badge keeps its own definition (display name, kind, colors); sections the editor
 draws itself (stats, magic paths, clears) are kept as they are.
 
-Usage: python3 tools/badge_sections.py   (rewrites Dom5Editor/Data/monster_badges.json and item_badges.json)
+Usage: python3 tools/badge_sections.py   (rewrites Dom5Editor.Core/Data/monster_badges.json and item_badges.json)
 """
 import json
 import os
 import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA = os.path.join(ROOT, 'Dom5Editor', 'Data')
+DATA = os.path.join(ROOT, 'Dom5Editor.Core', 'Data')
 
 # the manual's monster sections, merged into groups a page can show (in this order)
 MONSTER_GROUPS = [

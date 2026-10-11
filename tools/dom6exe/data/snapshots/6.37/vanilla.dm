@@ -150769,6 +150769,7 @@
 #truesight
 #ironvul 1
 #nametype 168
+#3castbattlespell 79
 #magicpower 1
 #stealthy 25
 #itemslots 860678
@@ -150777,7 +150778,6 @@
 #magicskill 2 2
 #magicskill 7 2
 #weapon 583
--- ro: ability 1168 = 79
 #end
 
 #selectmonster 4093

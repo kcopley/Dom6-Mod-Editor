@@ -2087,6 +2087,13 @@
           "refType": "spell"
         },
         {
+          "name": "3castbattlespell",
+          "display": "3castbattlespell",
+          "type": "ref",
+          "refType": "spell",
+          "description": "Like #onebattlespell, but at least three monsters of this type must be on the battlefield for the spell to be cast."
+        },
+        {
           "name": "polygetmagic",
           "display": "Polygetmagic",
           "type": "int",

@@ -2,7 +2,7 @@
  "game_version": "6.37",
  "exe_sha256_16": "d77cd364fe447e85",
  "exe": "/mnt/c/Games/Steam/steamapps/common/Dominions6/Dominions6.exe",
- "made": "2026-10-07",
+ "made": "2026-10-11",
  "contains_game_text": false,
  "note": "Written by tools/dom6exe snapshot, for dom6exe.py changelog."
 }

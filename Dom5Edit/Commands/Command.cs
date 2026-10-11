@@ -1708,6 +1708,7 @@ namespace Dom5Edit.Commands
         TWICEBORNCOST,
         VAR0UNITS,
         WASTESURV,
+        ZZ3CASTBATTLESPELL,
     }
 
     public class CommandsMap
@@ -2256,6 +2257,7 @@ namespace Dom5Edit.Commands
             _commandMap.Add("#carcasscollector", Command.CARCASSCOLLECTOR);
             _commandMap.Add("#bonusspells", Command.BONUSSPELLS);
             _commandMap.Add("#onebattlespell", Command.ONEBATTLESPELL);
+            _commandMap.Add("#3castbattlespell", Command.ZZ3CASTBATTLESPELL);
             _commandMap.Add("#crossbreeder", Command.CROSSBREEDER);
             _commandMap.Add("#deathbanish", Command.DEATHBANISH);
             _commandMap.Add("#kokytosret", Command.KOKYTOSRET);

@@ -12,7 +12,7 @@ def main():
     project_root = os.path.dirname(script_dir)
 
     commands_file = os.path.join(project_root, "docs/pdf_extracted/commands_by_entity_clean.json")
-    badges_file = os.path.join(project_root, "Dom5Editor/Data/monster_badges.json")
+    badges_file = os.path.join(project_root, "Dom5Editor.Core/Data/monster_badges.json")
 
     # Load commands reference
     with open(commands_file, 'r', encoding='utf-8') as f:

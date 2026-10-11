@@ -136,7 +136,7 @@ def num(x):
         return None
 
 
-IDENT = re.compile(r'[a-z_][a-z0-9_]*$')
+IDENT = re.compile(r'[a-z0-9_]*[a-z_][a-z0-9_]*$')  # #1unit, #2com, #3d6units start with a digit
 
 
 def text(b):

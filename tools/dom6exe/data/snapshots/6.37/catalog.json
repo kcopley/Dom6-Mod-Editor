@@ -191,6 +191,36 @@
   },
   "event": {
    "commands": [
+    "10d6units",
+    "11d6units",
+    "12d6units",
+    "13d6units",
+    "14d6units",
+    "15d6units",
+    "16d6units",
+    "1d3units",
+    "1d3vis",
+    "1d6units",
+    "1d6vis",
+    "1unit",
+    "2com",
+    "2d3units",
+    "2d4vis",
+    "2d6units",
+    "2d6vis",
+    "3d3units",
+    "3d6units",
+    "3d6vis",
+    "4com",
+    "4d3units",
+    "4d6units",
+    "4d6vis",
+    "5com",
+    "5d6units",
+    "6d6units",
+    "7d6units",
+    "8d6units",
+    "9d6units",
     "addascension",
     "addequip",
     "addgeo",
@@ -549,6 +579,216 @@
    ],
    "complete": false,
    "effects": {
+    "10d6units": {
+     "add": [
+      "a169"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "11d6units": {
+     "add": [
+      "a170"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "12d6units": {
+     "add": [
+      "a171"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "13d6units": {
+     "add": [
+      "a172"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "14d6units": {
+     "add": [
+      "a173"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "15d6units": {
+     "add": [
+      "a174"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "16d6units": {
+     "add": [
+      "a175"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "1d3units": {
+     "add": [
+      "a156"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "1d3vis": {
+     "add": [
+      "a14"
+     ],
+     "max": 56,
+     "min": -1
+    },
+    "1d6units": {
+     "add": [
+      "a160"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "1d6vis": {
+     "add": [
+      "a15"
+     ],
+     "max": 56,
+     "min": -1
+    },
+    "1unit": {
+     "add": [
+      "a155"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "2com": {
+     "add": [
+      "a151"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "2d3units": {
+     "add": [
+      "a157"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "2d4vis": {
+     "add": [
+      "a16"
+     ],
+     "max": 56,
+     "min": -1
+    },
+    "2d6units": {
+     "add": [
+      "a161"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "2d6vis": {
+     "add": [
+      "a17"
+     ],
+     "max": 56,
+     "min": -1
+    },
+    "3d3units": {
+     "add": [
+      "a158"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "3d6units": {
+     "add": [
+      "a162"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "3d6vis": {
+     "add": [
+      "a18"
+     ],
+     "max": 56,
+     "min": -1
+    },
+    "4com": {
+     "add": [
+      "a152"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "4d3units": {
+     "add": [
+      "a159"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "4d6units": {
+     "add": [
+      "a163"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "4d6vis": {
+     "add": [
+      "a19"
+     ],
+     "max": 56,
+     "min": -1
+    },
+    "5com": {
+     "add": [
+      "a153"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "5d6units": {
+     "add": [
+      "a164"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "6d6units": {
+     "add": [
+      "a165"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "7d6units": {
+     "add": [
+      "a166"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "8d6units": {
+     "add": [
+      "a167"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
+    "9d6units": {
+     "add": [
+      "a168"
+     ],
+     "max": 19999,
+     "min": -100000
+    },
     "addascension": {
      "max": 10000,
      "min": -10000
@@ -5643,6 +5883,7 @@
   },
   "monster": {
    "commands": [
+    "3castbattlespell",
     "aciddigest",
     "acidres",
     "acidshield",
@@ -6217,6 +6458,13 @@
    ],
    "complete": true,
    "effects": {
+    "3castbattlespell": {
+     "max": 7999,
+     "min": 0,
+     "set": [
+      "a1168"
+     ]
+    },
     "aciddigest": {
      "max": 100,
      "min": 0,

@@ -60,6 +60,13 @@ namespace Dom5Edit.GameData
         public static IReadOnlyCollection<string> CommandsOf(EntityType type) =>
             ContextOf(type) is string c && _contexts.TryGetValue(c, out var context) ? context.Commands : (IReadOnlyCollection<string>)Array.Empty<string>();
 
+        /// <summary>
+        /// Whether the game reads this command (without '#') outside a block: a #new.../#select...,
+        /// a #clear... of the whole mod, or a general setting (#poppergold, ...), read anywhere.
+        /// </summary>
+        public static bool IsModLevel(string name) =>
+            _top.Contains(name) || _contexts.TryGetValue("global", out var general) && general.Commands.Contains(name);
+
         /// <summary>The game parser contexts ("monster", "item", ...) that read this command (without '#').</summary>
         public static IEnumerable<string> ContextsReading(string name) =>
             _contexts.Where(kv => kv.Key != "top" && kv.Value.Commands.Contains(name)).Select(kv => kv.Key);

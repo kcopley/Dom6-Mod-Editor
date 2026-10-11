@@ -625,8 +625,9 @@ renumbered them).
   `#selectevent` block in between doesn't count.
 - The event parser also compares `#2com`, `#4com`, `#5com`, `#1unit`, `#1d3units`-`#4d3units`,
   `#1d6units`-`#16d6units`, `#1d3vis`, `#1d6vis`, `#2d4vis`, `#2d6vis`, `#3d6vis` and
-  `#4d6vis` by name (effects 151-153, 155, 156-159, 160-175, 14-19). The catalog misses them
-  (its name pattern needs a leading letter).
+  `#4d6vis` by name (effects 151-153, 155, 156-159, 160-175, 14-19). All append (generic
+  handler kind 10/11): nine `#1unit` lines give nine units. The catalog and the reading rules
+  have them since 2026-10-11 (the name pattern needed a leading letter before).
 - `#req_notnation` stores what `#req_notfornation` does, `#arena1` what `#arena` does.
 - Vanilla stores 522 of its 20,095 pairs (2.6%) with codes no command writes: effect 190
   (gold with a random part, value x 1.0-2.0; the game's debug text calls it "gold" like

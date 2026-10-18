@@ -76,22 +76,34 @@ namespace Dom5Editor.Ava.Views
         private void Attach(EntityTypeTab? tab)
         {
             if (_tab != null)
-            {
                 _tab.PropertyChanged -= OnTabChanged;
-                _tab.Items.CollectionChanged -= OnItemsChanged;
-            }
+            Listen(null);
             _tab = tab;
             if (tab == null)
                 return;
             tab.PropertyChanged += OnTabChanged;
-            tab.Items.CollectionChanged += OnItemsChanged; // (an entity made or deleted)
+            Listen(tab.Items); // (an entity made or deleted)
             Sort.SelectedIndex = tab.SortBy == "DisplayName" ? 1 : 0;
             Refresh();
+        }
+
+        // the rows listened to: the tab's, until it builds them again (EntityTypeTab.Reload, after a renumbering)
+        private System.Collections.ObjectModel.ObservableCollection<EntityListItem>? _rows;
+
+        private void Listen(System.Collections.ObjectModel.ObservableCollection<EntityListItem>? rows)
+        {
+            if (_rows != null)
+                _rows.CollectionChanged -= OnItemsChanged;
+            _rows = rows;
+            if (rows != null)
+                rows.CollectionChanged += OnItemsChanged;
         }
 
         // the list again when a filter changes (the core's rules: EntityTypeTab.Shown)
         private void OnTabChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(EntityTypeTab.Items) && _tab != null && !ReferenceEquals(_rows, _tab.Items))
+                Listen(_tab.Items);
             if (e.PropertyName is nameof(EntityTypeTab.SearchText) or nameof(EntityTypeTab.ShowVanilla) or nameof(EntityTypeTab.ShowModified)
                 or nameof(EntityTypeTab.ShowNew) or nameof(EntityTypeTab.Facet) or nameof(EntityTypeTab.SortBy) or nameof(EntityTypeTab.Items))
                 Refresh();

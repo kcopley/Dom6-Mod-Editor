@@ -288,6 +288,25 @@ namespace Dom5Editor.UI.ViewModels
         /// <summary>Opens a row in a window of its own; the list's selection stays.</summary>
         public void PopOut(EntityListItem item) => PopOutRequested?.Invoke(item);
 
+        /// <summary>
+        /// The list again from the mod, the same entity selected (after a renumbering: rows are
+        /// kept by number). The views pick up the new rows from the Items change.
+        /// </summary>
+        public void Reload()
+        {
+            if (_items == null)
+                return;
+            var selected = _selected?.Entity;
+            _byKey.Clear();
+            _items = Build();
+            OnPropertyChanged(nameof(Items));
+            if (selected != null)
+            {
+                _selected = null;
+                SelectedItem = Find(selected);
+            }
+        }
+
         /// <summary>Keeps the list in step with an edit (and an undo or redo of one).</summary>
         public void OnChanged(IModEdit edit)
         {

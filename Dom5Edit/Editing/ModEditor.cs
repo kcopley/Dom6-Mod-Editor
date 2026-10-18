@@ -191,6 +191,19 @@ namespace Dom5Edit.Editing
             return edit;
         }
 
+        /// <summary>
+        /// The Renumber tool (Merge.ModRenumber): the plan's entities to their new numbers, every
+        /// reference following; one edit. Throws an EditException, with nothing changed, if the
+        /// plan has a problem or a name would find another entity afterwards.
+        /// </summary>
+        public IModEdit Renumber(Merge.RenumberPlan plan)
+        {
+            var edit = RenumberEdit.Apply(Mod, plan, OnUndoRedo);
+            Resolver.Invalidate();
+            Changed?.Invoke(edit);
+            return edit;
+        }
+
         internal static string Name(Command c) => CommandsMap.TryGetString(c, out var s) ? s : c.ToString();
     }
 

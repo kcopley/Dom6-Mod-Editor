@@ -545,6 +545,16 @@ namespace Dom5Editor.Ava.Views
             if (merge.OpenAfter is string merged && await ConfirmDiscard())
                 Open(merged);
         }
+        /// <summary>"Renumber...": the open mod's numbers moved to the blocks picked (one edit, saved as usual).</summary>
+        private async void Renumber_Click(object? sender, RoutedEventArgs e)
+        {
+            if (_vm.Session is not { } session)
+                return;
+            var window = new RenumberWindow(new RenumberViewModel(session));
+            await window.ShowDialog(this);
+            if (window.ViewModel?.IsDone == true)
+                _vm.StatusMessage = window.ViewModel.Summary;
+        }
         private void ReportOpen_Click(object? sender, RoutedEventArgs e) => OpenReport(rebuild: false);
         private void ReportClose_Click(object? sender, RoutedEventArgs e) => _vm.ShowReportBar = false;
 

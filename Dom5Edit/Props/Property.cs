@@ -114,7 +114,7 @@ namespace Dom5Edit.Props
             Commands = commands;
         }
 
-        public string Text { get; }
+        public string Text { get; internal set; } // (a renumbering rewrites its numbers: Editing.RenumberEdit)
         public int Commands { get; }
         public List<Property> Members { get; } = new List<Property>();
     }

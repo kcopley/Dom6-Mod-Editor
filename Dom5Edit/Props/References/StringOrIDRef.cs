@@ -117,6 +117,29 @@ namespace Dom5Edit.Props
                 _id = moved.ID;
         }
 
+        /// <summary>The name as written in the file (null for a reference by number).</summary>
+        internal string? WrittenName => IsStringRef ? _name : null;
+
+        /// <summary>
+        /// A name written with its number ("Militia (30)": the game's monster lookup takes that
+        /// form) when that number moved (Merge.ModRenumber): the new one. Returns the name before,
+        /// or null when it wasn't one.
+        /// </summary>
+        internal string? FollowNamedNumber(int old, int now)
+        {
+            if (!IsStringRef || string.IsNullOrEmpty(_name))
+                return null;
+            var m = System.Text.RegularExpressions.Regex.Match(_name, @"^(.*) \((\d+)\)$");
+            if (!m.Success || m.Groups[2].Value != old.ToString())
+                return null;
+            var before = _name;
+            _name = $"{m.Groups[1].Value} ({now})";
+            return before;
+        }
+
+        /// <summary>Puts back a name <see cref="FollowNamedNumber"/> changed (an undone renumbering).</summary>
+        internal void RestoreName(string name) => _name = name;
+
         public void SetEntity(string value)
         {
             Parse(this.Command, value, "");

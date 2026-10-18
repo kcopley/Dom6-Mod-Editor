@@ -42,6 +42,33 @@ namespace Dom5Edit.Merge
         }
 
         /// <summary>
+        /// Moves many of a mod's entities at once (the Renumber tool): through numbers nothing uses
+        /// first, so none lands on one yet to move; then one pass over the mod's lines, each
+        /// reference to a moved entity taking its new number.
+        /// </summary>
+        internal static void MoveAll(Mod mod, IReadOnlyList<(IDEntity Entity, int To)> moves)
+        {
+            int temp = int.MinValue / 2;
+            foreach (var (e, _) in moves)
+            {
+                mod.Database[e.GetEntityType()].Rekey(e, e.ID, temp);
+                e.ID = temp++;
+            }
+            foreach (var (e, to) in moves)
+            {
+                mod.Database[e.GetEntityType()].Rekey(e, e.ID, to);
+                e.ID = to;
+            }
+            var moved = new HashSet<IDEntity>(moves.Select(m => m.Entity), ReferenceEqualityComparer.Instance);
+            foreach (var p in Lines(mod))
+                if (p is Reference r)
+                    foreach (var part in r.Parts())
+                        if (part.TryGetEntity(out var target) && moved.Contains(target))
+                            part.FollowTarget(target);
+            ModResolver.For(mod).Invalidate();
+        }
+
+        /// <summary>
         /// Moves a code, variable, enchantment, monster tag or the like (a DependentEntity of the
         /// mod) to another number: everything that names it is written with the new one; a submod's
         /// own entry for it (linked to this one) follows.

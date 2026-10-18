@@ -368,5 +368,143 @@
    ],
    "about": "the hardest pair: 1,087 collisions, unit chains, copies of game units the other changes, dangling references"
   }
+ ],
+ "renumbersAbout": "Stage 6 too (docs/RENUMBER.md): Dom5Tests renumber moves the mod's own numbers to blocks from 'starts' (gameNumbers: its own on the game's numbers too), saves as the editor saves (it must read back the same), and undo/redo must save byte for byte; then gameread.py --merge reads the renumbered file as a one-part merge (the numbers mapped through the moves): no differences, no chained unit out of order. A mod that isn't installed skips the case; slow ones run only in the full suite.",
+ "renumbers": [
+  {
+   "name": "renumber-fixture",
+   "mod": "Dom5Tests/fixtures/renumber/ren_a.dm",
+   "starts": {
+    "monster": 6000,
+    "weapon": 1500,
+    "armor": 500,
+    "site": 1600
+   },
+   "about": "names written with their number, a #select by name, a run of units that turn into the next (kept together), a lone #shrinkhp (kept where it is), a line of two commands, a merc's \"Name (number)\", a template's #form, events"
+  },
+  {
+   "name": "renumber-fixture-overlap",
+   "mod": "Dom5Tests/fixtures/renumber/ren_a.dm",
+   "starts": {
+    "monster": 5103,
+    "weapon": 1500,
+    "armor": 500,
+    "site": 1600
+   },
+   "gameNumbers": true,
+   "about": "a block that overlaps the numbers now; the mod's weapon on a game number moved too"
+  },
+  {
+   "name": "renumber-cataclysm",
+   "mod": "/mnt/c/Users/kurtc/AppData/Roaming/Dominions6/mods/Legendary_Cataclysm/Legendary_Cataclysm1.0.dm",
+   "starts": {
+    "monster": 4200,
+    "weapon": 900,
+    "armor": 300,
+    "site": 1500
+   },
+   "gameNumbers": true,
+   "about": "the request that started it: IDs all over the place, two weapons on the game's numbers"
+  },
+  {
+   "name": "renumber-dwellings",
+   "mod": "/mnt/c/Users/kurtc/AppData/Roaming/Dominions6/mods/Legendary_Dwellings/Legendary_Dwellings1.0.dm",
+   "starts": {
+    "monster": 4200,
+    "weapon": 900,
+    "armor": 300,
+    "site": 1500
+   },
+   "slow": true
+  },
+  {
+   "name": "renumber-guildmasters",
+   "mod": "/mnt/c/Users/kurtc/AppData/Roaming/Dominions6/mods/Legendary_Guildmasters/Legendary_Guildmasters1.0.dm",
+   "starts": {
+    "monster": 4200,
+    "weapon": 900,
+    "armor": 300,
+    "site": 1500
+   },
+   "slow": true
+  },
+  {
+   "name": "renumber-sellswords",
+   "mod": "/mnt/c/Users/kurtc/AppData/Roaming/Dominions6/mods/Legendary_Sellswords/Legendary_Sellswords1.0.dm",
+   "starts": {
+    "monster": 4200,
+    "weapon": 900,
+    "armor": 300,
+    "site": 1500
+   },
+   "slow": true
+  },
+  {
+   "name": "renumber-sites",
+   "mod": "/mnt/c/Users/kurtc/AppData/Roaming/Dominions6/mods/Legendary_Sites/Legendary_Sites1.0.dm",
+   "starts": {
+    "monster": 4200,
+    "weapon": 900,
+    "armor": 300,
+    "site": 1500
+   },
+   "slow": true
+  },
+  {
+   "name": "renumber-vendors",
+   "mod": "/mnt/c/Users/kurtc/AppData/Roaming/Dominions6/mods/Legendary_Vendors/Legendary_Vendors1.0.dm",
+   "starts": {
+    "monster": 4200,
+    "weapon": 900,
+    "armor": 300,
+    "site": 1500
+   },
+   "slow": true
+  },
+  {
+   "name": "renumber-confluence",
+   "mod": "/mnt/c/Games/Steam/steamapps/workshop/content/2511500/3411126459/Confluence_1.06.dm",
+   "starts": {
+    "monster": 4200,
+    "weapon": 900,
+    "armor": 300,
+    "site": 1500
+   },
+   "slow": true,
+   "about": "2,700 numbers; an unclosed #descr over a rewritten line (noted)"
+  },
+  {
+   "name": "renumber-forgotten-realms",
+   "mod": "/mnt/c/Games/Steam/steamapps/workshop/content/2511500/3162431546/ForgottenRealms-095.dm",
+   "starts": {
+    "monster": 4200,
+    "weapon": 900,
+    "armor": 300,
+    "site": 1500
+   },
+   "slow": true
+  },
+  {
+   "name": "renumber-sombre",
+   "mod": "/mnt/c/Games/Steam/steamapps/workshop/content/2511500/3082462648/Sombre_Warhammer_dom6.dm",
+   "starts": {
+    "monster": 4200,
+    "weapon": 900,
+    "armor": 300,
+    "site": 1500
+   },
+   "slow": true
+  },
+  {
+   "name": "renumber-domenhanced",
+   "mod": "/mnt/c/Users/kurtc/AppData/Roaming/Dominions6/mods/DomEnhancedMisc/DomEnhanced2_14_One_Age.dm",
+   "starts": {
+    "monster": 4200,
+    "weapon": 900,
+    "armor": 300,
+    "site": 1500
+   },
+   "slow": true
+  }
  ]
 }

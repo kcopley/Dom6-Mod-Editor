@@ -3,6 +3,38 @@
 Running log of the autonomous work sessions: what was done, what was found, what's next.
 Newest entries at the top. Commits are local unless noted; the user pushes.
 
+## 2026-10-18: Renumber..., a mod's own numbers moved to blocks the author picks
+
+The Legendary author asked for a way to move all his IDs to new ranges (his are "all over the
+place", some in the game's own). The user: a generic tool on a loaded mod, the numbers each mod
+uses, a start number per type; the usual saving with its backups alongside. docs/RENUMBER.md.
+
+- **The tool:** Renumber... (main window, next to Merge mods...). Per type (monsters, weapons,
+  armor, sites: the ones a mod numbers), how many and the numbers now; a start number; the new
+  block, planned again at each number typed (the context ~200 ms on Confluence once, then ~2 ms).
+  One undoable edit; the save is the usual save. `Dom5Tests renumber MOD OUT --start TYPE=N`
+  runs the same and checks undo/redo byte for byte.
+- **Where they go:** packed from the start in their order, skipping the game's, a needed mod's,
+  the mod's own that stay and numbers a line refers to that nothing has (it still finds nothing).
+  Units that go by each other's numbers stay in a row (`ModMerger.Runs`, now shared); a unit
+  whose neighbour isn't the mod's own keeps its number and the neighbour stays free.
+- **What follows:** number references, "Name (number)" texts (merc `#com`, template `#form`),
+  headers with their spacing and comments, lines of several commands (whole, the line count
+  kept), `#select` by name. Only the number changes in a line's original text. The name check:
+  if a move changes what a written name finds (the game takes the lowest number), nothing moves.
+  The mod's own `#new` on the game's numbers move only when ticked; a line naming one by name
+  is then a problem. Lines the editor doesn't read but the game does are noted, not changed.
+- **Fix found on the way:** `#req_pretismnr` and `#req_targrealmnr` were plain numbers; now
+  monster references (they follow moves and merges).
+- **Referee:** a monster's name is also looked up as "name (number)" (the game's lookup
+  0x1402b7720 tries that form first), and a merc's text argument (`#com`, `#unit`, `#item`) is
+  looked up as a name. The merge cases' counts didn't change.
+- **Checked:** fidelity stage 6 now has `renumbers` (the fixture twice, the six Legendary mods,
+  Confluence, Forgotten Realms, Sombre, DomEnhanced): all pass, undo/redo byte for byte, the
+  game reads each as the mod (one known kind on Confluence: an unclosed `#descr` over a
+  rewritten line). The window, headless (`--renumber-window`), saves the command line's file
+  byte for byte.
+
 ## 2026-10-11: the Legendary mods (six event-heavy mods by one author), edits checked end to end
 
 The user added six "Legendary" mods (Cataclysm, Dwellings, Guildmasters, Sellswords, Sites,

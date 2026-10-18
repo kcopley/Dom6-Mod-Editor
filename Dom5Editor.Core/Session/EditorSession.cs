@@ -41,6 +41,16 @@ namespace Dom5Editor.Session
             Usage = new UsageIndex(this);
             Editor.Changed += e =>
             {
+                // a renumbering (Renumber..., its undo and redo): what's kept by number is worked out again
+                if (e is RenumberEdit)
+                {
+                    _references.Clear();
+                    _events = null;
+                    _spells = null;
+                    Usage.Reset();
+                    Changed?.Invoke(e);
+                    return;
+                }
                 // the touched entities' names (or existence) may have changed: update their rows
                 foreach (var entity in e.Entities)
                     UpdateReference(entity);

@@ -210,6 +210,20 @@ namespace Dom5Editor.UI.Views
 
         private void OnSessionChanged(IModEdit edit)
         {
+            if (edit is RenumberEdit)
+            {
+                // every list again (rows are kept by number); the way back and forward went by the old rows
+                _jumpTargets = null;
+                foreach (var tab in Tabs.OfType<EntityTypeTab>())
+                    tab.Reload();
+                _back.Clear();
+                _forward.Clear();
+                _current = SelectedTab is EntityTypeTab t && t.SelectedItem is { } item ? (t, item) : null;
+                OnPropertyChanged(nameof(CanGoBack));
+                OnPropertyChanged(nameof(CanGoForward));
+                OnPropertyChanged(nameof(EntityCount));
+                return;
+            }
             if (edit.Entities.Count > 0)
                 _jumpTargets = null; // names or entities may have changed; rebuilt on next use
             foreach (var tab in Tabs.OfType<EntityTypeTab>())

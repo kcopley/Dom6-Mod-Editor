@@ -56,6 +56,8 @@
                             ToolTip.Tip="Check the mod for problems (unread lines, missing references, ID clashes)"/>
                     <Button Content="Merge mods..." Click="Merge_Click"
                             ToolTip.Tip="Merge several mods into one new file: where two use the same number, the later one's moves and its references follow (the mods aren't changed)"/>
+                    <Button Content="Renumber..." IsEnabled="{Binding HasMod}" Click="Renumber_Click"
+                            ToolTip.Tip="Move this mod's units, weapons, armor and sites to number blocks you choose; every line that refers to one follows (one edit: Undo puts it back)"/>
                 </StackPanel>
 
                 <!-- the mod's name: trimmed when the window is narrow (the whole name in its tooltip) -->

@@ -1,0 +1,86 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:coreviews="clr-namespace:Dom5Editor.UI.Views;assembly=Dom5Editor.Core"
+        x:Class="Dom5Editor.Ava.Views.RenumberWindow"
+        Title="Renumber" Width="780" Height="660" MinWidth="560" MinHeight="440"
+        WindowStartupLocation="CenterOwner">
+    <!-- "Renumber..." (UI.Views.RenumberViewModel, Dom5Edit.Merge.ModRenumber, docs/RENUMBER.md):
+         the open mod's numbers per type, a start number for each, the block each would move to;
+         the move is one edit of the open mod, saved as usual. -->
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,12">
+            <TextBlock Text="Renumber the mod" Classes="header"/>
+            <TextBlock Text="{Binding ModText}" Classes="subheader"/>
+            <TextBlock Classes="muted" TextWrapping="Wrap"
+                       Text="Moves the units, weapons, armor and sites this mod numbers itself to a block you choose: from a start number, in their order. Every line that refers to one follows. Numbers the game, a mod this one needs, or a line that finds nothing already uses are skipped, and units that turn into the next number stay next to it. It's one edit of the open mod: look it over, then save as usual (a copy of the file goes to the backups first). Undo puts it back. Mods that need this one (its submods) aren't changed."/>
+            <TextBlock Text="{Binding WorkshopNote}" Foreground="{StaticResource WarningBrush}" TextWrapping="Wrap"
+                       IsVisible="{Binding WorkshopNote, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+        </StackPanel>
+
+        <!-- what it comes to; the move -->
+        <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,12,0,0">
+            <TextBlock Text="{Binding Summary}" TextWrapping="Wrap"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="Renumber" Classes="accent" Click="Apply_Click" IsEnabled="{Binding CanApply}"
+                        ToolTip.Tip="Move the numbers (one edit: Undo puts it back; the mod isn't saved until you save it)"/>
+                <Button Content="Close" Click="Close_Click"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- the types -->
+        <StackPanel DockPanel.Dock="Top">
+            <Grid ColumnDefinitions="110,70,130,140,*" Margin="10,0,10,4">
+                <TextBlock Text="Type" Classes="muted"/>
+                <TextBlock Grid.Column="1" Text="How many" Classes="muted"/>
+                <TextBlock Grid.Column="2" Text="Numbers now" Classes="muted"/>
+                <TextBlock Grid.Column="3" Text="Start at" Classes="muted"/>
+                <TextBlock Grid.Column="4" Text="New numbers" Classes="muted"/>
+            </Grid>
+            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4">
+                <ItemsControl ItemsSource="{Binding Rows}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="coreviews:RenumberRow">
+                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="10,6">
+                                <Grid ColumnDefinitions="110,70,130,140,*" ToolTip.Tip="{Binding Tip}">
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding CountText}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding RangeText}" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="3" Text="{Binding Start, Mode=TwoWay}" Watermark="(stays)" Width="120"
+                                             HorizontalAlignment="Left" ToolTip.Tip="The first new number (empty: these keep their numbers)"/>
+                                    <StackPanel Grid.Column="4" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding NewRange}" Foreground="{StaticResource AccentHighlightBrush}"/>
+                                        <TextBlock Text="{Binding Error}" Foreground="{StaticResource WarningBrush}"
+                                                   IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+            <CheckBox IsChecked="{Binding GameNumbers, Mode=TwoWay}" IsVisible="{Binding HasGameNumbers}" Margin="10,10,0,0">
+                <TextBlock Text="{Binding GameNumbersText}" TextWrapping="Wrap"/>
+            </CheckBox>
+        </StackPanel>
+
+        <!-- why it can't, and what to know -->
+        <ScrollViewer Margin="0,12,0,0">
+            <StackPanel Spacing="4">
+                <ItemsControl ItemsSource="{Binding Problems}" IsVisible="{Binding HasProblems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding StringFormat='⛔ {0}'}" Foreground="#E5484D" TextWrapping="Wrap" Margin="0,1"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <ItemsControl ItemsSource="{Binding Notes}" IsVisible="{Binding HasNotes}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding StringFormat='• {0}'}" Classes="muted" TextWrapping="Wrap" Margin="0,1"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

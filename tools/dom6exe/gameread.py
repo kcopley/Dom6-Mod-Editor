@@ -24,6 +24,8 @@ and copies act on what's above them).
       with that name, among the game's, the separate needed mods' and the parts read so far); and
       units that turn into the next or previous number (#shrinkhp, #growhp, #xpshape) keep that
       neighbour.
+      A renumbered mod (Dom5Tests renumber, docs/RENUMBER.md) is checked the same way, as a merge
+      of one part; its image folders must be next to it (sprites are compared by file).
 
 Exit status 0 when the game reads both the same, 1 when not. The rules come from
 tools/dom6exe/data/dmread-<version>.json (written by `dom6exe.py dmread --out ...` from the exe),
@@ -202,11 +204,14 @@ HEAD_KIND = dict(NAMED, template='nation')
 
 def names(readings):
     """Per pass: name -> (the lowest number a #new/#select block of that number gives it with
-    #name, the reading it's in: its moves map it)."""
+    #name, the reading it's in: its moves map it). A monster also by "name (number)": the game's
+    monster lookup tries that form first (Dominions6.exe 0x1402b7720: "%s (%d)" against each
+    monster), so a renumbered mod's "Militia (30)" follows its unit."""
     out = {}
     for i, r in enumerate(readings):
         for ctx in NAMED.values():
             table = out.setdefault(ctx, {})
+            numbered = out.setdefault(ctx + ' (number)', {})
             for blk in r.passes.get(ctx, []):
                 head = blk['head']
                 if len(head) < 2 or not head[1] or not isinstance(head[1][0], int):
@@ -216,6 +221,10 @@ def names(readings):
                         n = it[1][1].lower().replace('%', '_')
                         if n not in table or head[1][0] < table[n][0]:
                             table[n] = (head[1][0], i)
+                        if ctx == NAMED.get('monster'):
+                            numbered['%s (%d)' % (n, head[1][0])] = (head[1][0], i)
+    for ctx in NAMED.values():
+        out[ctx].update(out.pop(ctx + ' (number)', {}))
     return out
 
 
@@ -284,7 +293,14 @@ def normalized(reading, ctx, kinds, effects, moves, table, reading_moves, spells
             if kind and len(it) > 1 and isinstance(it[1], tuple) and it[1]:
                 a = it[1]
                 k = kind
-                if a[0] == 'name':
+                if a[0] == 'text' and len(a) > 1 and a[1]:
+                    # a mercenary's #com, #unit, #item: the merc parser reads text and looks the
+                    # name up as the game does (0x1402b7720: "name (number)", then the name)
+                    k = 'monster' if kind == 'monster or tag' else kind
+                    n = a[1].lower().replace('%', '_')
+                    if k in NAMED and n in table.get(NAMED[k], {}):
+                        a = (named(k, n),)
+                elif a[0] == 'name':
                     k = 'monster' if kind == 'monster or tag' else kind
                     if k in NAMED and a[1] in table.get(NAMED[k], {}):
                         a = (named(k, a[1]),)

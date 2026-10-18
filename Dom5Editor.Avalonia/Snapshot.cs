@@ -44,6 +44,10 @@ namespace Dom5Editor.Ava
     ///                            logs the links there (buttons with a LinkCommand or a Link.Open) and the windows
     ///   --merge-window FILE.png OUT.dm A.dm B.dm[=A.dm] ...   "Merge mods...": the mods listed (B over A), merged into
     ///                            OUT.dm; renders FILE-before.png and FILE.png (after), logs the summary
+    ///   --renumber-window FILE.png TYPE=START ... [game] [apply]   "Renumber..." on the open mod: start
+    ///                            numbers typed (monster=8500 weapon=1700), the game's numbers ticked with
+    ///                            "game"; renders FILE.png, logs the rows, notes and problems; "apply" presses
+    ///                            Renumber (then --undo, --redo, --save, --select show the result)
     /// Messages go to FILE.png.log / FILE.dm.log next to the first output, and to stdout.
     /// Settings, backups, errors.log and recovery copies go to temp folders, never the user's.
     /// Example: Dom5Editor.Avalonia --snapshot --mod my.dm --select monster 3 --set hp 30 --png hp.png --save out.dm
@@ -501,6 +505,47 @@ namespace Dom5Editor.Ava
                             Render(merge, png);
                             Log($"merged in {watch.ElapsedMilliseconds} ms: {merge.ViewModel.Status}\n{merge.ViewModel.Summary}");
                             merge.Close();
+                            break;
+                        }
+                        case "--renumber-window":
+                        {
+                            var png = args[++i];
+                            _logPath ??= png + ".log";
+                            var rvm = new Dom5Editor.UI.Views.RenumberViewModel(vm.Session ?? throw new InvalidOperationException("no mod open"));
+                            var renumber = new RenumberWindow(rvm) { Width = 780, Height = 660 };
+                            bool apply = false;
+                            while (i + 1 < args.Length && !args[i + 1].StartsWith("--"))
+                            {
+                                var a = args[++i];
+                                if (a == "game")
+                                    rvm.GameNumbers = true;
+                                else if (a == "apply")
+                                    apply = true;
+                                else
+                                {
+                                    var kv = a.Split('=', 2);
+                                    var row = rvm.Rows.FirstOrDefault(r => r.Survey.Kind == kv[0].ToLowerInvariant()) ?? throw new ArgumentException($"the mod has no {kv[0]}s to renumber");
+                                    row.Start = kv[1];
+                                }
+                            }
+                            renumber.Show();
+                            Pump();
+                            Render(renumber, png);
+                            foreach (var r in rvm.Rows)
+                                Log($"   {r.Title}: {r.CountText}, {r.RangeText} -> {(r.Start.Length > 0 ? r.Start : "(stays)")}: {r.NewRange}{(r.Error != null ? " " + r.Error : "")}");
+                            foreach (var p in rvm.Problems)
+                                Log("   problem: " + p);
+                            foreach (var n in rvm.Notes)
+                                Log("   note: " + n);
+                            Log($"renumber window: {rvm.Summary}");
+                            if (apply)
+                            {
+                                var watch = System.Diagnostics.Stopwatch.StartNew();
+                                var error = rvm.Apply();
+                                Pump();
+                                Log(error != null ? "renumber refused: " + error : $"renumbered in {watch.ElapsedMilliseconds} ms: {rvm.Summary}");
+                            }
+                            renumber.Close();
                             break;
                         }
                         case "--load-menu":

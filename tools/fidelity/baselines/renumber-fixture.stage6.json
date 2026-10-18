@@ -1,0 +1,16 @@
+{
+ "moved": 8,
+ "movedByKind": {
+  "monster": 6,
+  "armor": 1,
+  "site": 1
+ },
+ "onGameNumbers": 0,
+ "notes": 1,
+ "linesChanged": 22,
+ "lines": [
+  148,
+  148
+ ],
+ "referee": {}
+}

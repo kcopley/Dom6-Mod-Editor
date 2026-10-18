@@ -49,6 +49,9 @@ namespace Dom5Editor.Session
         }
 
         /// <summary>Works the touched entities' entries out again.</summary>
+        /// <summary>Forgets every entry (a renumbering moved what they're kept by); built again when next asked.</summary>
+        public void Reset() => _byTarget = null;
+
         public void OnChanged(IModEdit edit)
         {
             if (_byTarget == null)

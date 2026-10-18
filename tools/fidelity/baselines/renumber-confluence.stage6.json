@@ -1,0 +1,19 @@
+{
+ "moved": 2739,
+ "movedByKind": {
+  "monster": 2119,
+  "weapon": 432,
+  "armor": 37,
+  "site": 151
+ },
+ "onGameNumbers": 0,
+ "notes": 2,
+ "linesChanged": 9862,
+ "lines": [
+  136880,
+  136880
+ ],
+ "referee": {
+  "a text without its closing quote runs over a rewritten line": 1
+ }
+}

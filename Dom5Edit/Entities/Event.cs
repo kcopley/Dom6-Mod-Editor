@@ -319,7 +319,7 @@ namespace Dom5Edit.Entities
             _propertyMap.Add(Command.REQ_NATIVESOIL, CommandProperty.Create); //#req_nativesoil 
             _propertyMap.Add(Command.REQ_VOID, IntProperty.Create); //#req_void < 0 | 1 >
             _propertyMap.Add(Command.REQ_GODAWAKE, IntProperty.Create); //#req_godawake <0 - 1>
-            _propertyMap.Add(Command.REQ_PRETISMNR, IntProperty.Create); //#req_pretismnr name | <number>
+            _propertyMap.Add(Command.REQ_PRETISMNR, MonsterOrMontagRef.Create); // a monster or a tag (the game: -100000..19999, as #req_mnr)
             _propertyMap.Add(Command.REQ_PRETAWAKE, IntProperty.Create); //#req_pretawake <0 - 1>
             _propertyMap.Add(Command.REQ_PATHGLAMOUR, IntProperty.Create); //#req_pathglamour <level>
             _propertyMap.Add(Command.REQ_NOPATHGLAMOUR, IntProperty.Create); //#req_nopathglamour <level>
@@ -377,7 +377,7 @@ namespace Dom5Edit.Entities
             _propertyMap.Add(Command.ADDGEO, BitmaskProperty.Create); //#addgeo <terrain bitmask>
             _propertyMap.Add(Command.REMGEO, BitmaskProperty.Create); //#remgeo <terrain bitmask>
             // Additional Dom6 additions
-            _propertyMap.Add(Command.REQ_TARGREALMNR, IntProperty.Create); //#req_targrealmnr <value>
+            _propertyMap.Add(Command.REQ_TARGREALMNR, MonsterOrMontagRef.Create); // a monster (the game: 0..19999, as #req_targmnr)
             // Read by the Dominions 6.37 parser (tools/dom6exe catalog)
             _propertyMap.Add(Command.ARENA1, CommandProperty.Create);
             _propertyMap.Add(Command.ARENA2, CommandProperty.Create);

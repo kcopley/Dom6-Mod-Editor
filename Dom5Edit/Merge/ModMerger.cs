@@ -564,7 +564,14 @@ namespace Dom5Edit.Merge
         /// entity per run otherwise. A unit whose next
         /// number isn't in the part is noted: moving it changes which unit that is.
         /// </summary>
-        private static List<List<IDEntity>> Runs(Mod part, EntityType type, List<IDEntity> mine, MergeReport report)
+        private static List<List<IDEntity>> Runs(Mod part, EntityType type, List<IDEntity> mine, MergeReport report) =>
+            Runs(part, type, mine, (e, neighbour, why) => report.Notes.Add($"{part.DisplayName}: {why}, which the part doesn't make: if it moves, that's another unit"));
+
+        /// <summary>
+        /// <see cref="Runs(Mod, EntityType, List{IDEntity}, MergeReport)"/>, telling <paramref name="loose"/> of each
+        /// entity that goes by a number <paramref name="mine"/> doesn't hold (the entity, that number, what it does).
+        /// </summary>
+        internal static List<List<IDEntity>> Runs(Mod part, EntityType type, List<IDEntity> mine, Action<IDEntity, int, string> loose)
         {
             if (type != EntityType.MONSTER)
                 return mine.Select(e => new List<IDEntity> { e }).ToList();
@@ -579,9 +586,9 @@ namespace Dom5Edit.Merge
                 if (next && byId.ContainsKey(e.ID + 1)) linkNext.Add(e.ID);
                 if (previous && byId.ContainsKey(e.ID - 1)) linkNext.Add(e.ID - 1);
                 if (next && !byId.ContainsKey(e.ID + 1))
-                    report.Notes.Add($"{part.DisplayName}: monster {e.ID} {e.Name} turns into the next number ({e.ID + 1}), which the part doesn't make: if it moves, that's another unit");
+                    loose(e, e.ID + 1, $"monster {e.ID} {e.Name} turns into the next number ({e.ID + 1})");
                 if (previous && !byId.ContainsKey(e.ID - 1))
-                    report.Notes.Add($"{part.DisplayName}: monster {e.ID} {e.Name} grows into the previous number ({e.ID - 1}), which the part doesn't make: if it moves, that's another unit");
+                    loose(e, e.ID - 1, $"monster {e.ID} {e.Name} grows into the previous number ({e.ID - 1})");
             }
             // a ritual that summons its unit and the next number (effect 10141, the exe: Call the
             // Birds of Splendor's two Yllerion): the pair keeps its order
@@ -593,7 +600,7 @@ namespace Dom5Edit.Merge
                             if (byId.ContainsKey(m.ID + 1))
                                 linkNext.Add(m.ID);
                             else
-                                report.Notes.Add($"{part.DisplayName}: spell {spell.Name} summons monster {m.ID} and the next number ({m.ID + 1}), which the part doesn't make: if it moves, that's another unit");
+                                loose(m, m.ID + 1, $"spell {spell.Name} summons monster {m.ID} and the next number ({m.ID + 1})");
                         }
             var runs = new List<List<IDEntity>>();
             foreach (var e in mine)
@@ -903,6 +910,23 @@ namespace Dom5Edit.Merge
                         kinds[spell.ID > 0 ? (back.TryGetValue(spell.ID, out var old) ? old : spell.ID).ToString() : (spell.Name ?? "").ToLowerInvariant()] = k;
             }
             return all;
+        }
+
+        /// <summary>
+        /// The map of a renumbered mod (the Renumber tool) for the referee, as a merge of one part:
+        /// <c>gameread.py --merge NEW.dm --map MAP.json</c> reads the mod's file as it was, numbers
+        /// moved as listed, against the renumbered one.
+        /// </summary>
+        public static void WriteRenumberMap(string path, Mod mod, IReadOnlyList<RenumberMove> moves)
+        {
+            var parts = new List<Mod> { mod };
+            var separate = mod.Below().Where(m => m != VanillaLoader.Vanilla && !string.IsNullOrEmpty(m.FullFilePath)).Reverse().ToList();
+            var moved = new Dictionary<Mod, Dictionary<(string Kind, int Old), int>>
+            {
+                [mod] = moves.ToDictionary(m => (Kind(m.Type), m.Old), m => m.New),
+            };
+            var strays = new Dictionary<Mod, Dictionary<(string Kind, int Old), int>> { [mod] = new() };
+            WriteMap(path, parts, separate, moved, new List<Snapshot>(), strays, SpellKinds(parts, moved));
         }
 
         private static void WriteMap(string path, List<Mod> parts, List<Mod> separate, Dictionary<Mod, Dictionary<(string Kind, int Old), int>> moved, List<Snapshot> snapshots,

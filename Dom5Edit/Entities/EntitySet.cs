@@ -251,6 +251,33 @@ namespace Dom5Edit.Entities
             Entities[newId] = entity;
         }
 
+        /// <summary>
+        /// After entities moved to other numbers (Merge.ModRenumber): each name given goes to the
+        /// lowest number that has it again (the game's rule for a name several share), among the
+        /// entity it finds now and the ones given with it (every entity with a #name of it).
+        /// </summary>
+        internal void Rename(IEnumerable<(string Name, T Entity)> named)
+        {
+            foreach (var g in named.GroupBy(n => n.Name, StringComparer.InvariantCultureIgnoreCase))
+            {
+                NamedEntities.TryGetValue(g.Key, out var best);
+                foreach (var (_, e) in g)
+                    if (best == null || !ReferenceEquals(e, best) && IsLowerID(e.ID, best))
+                        best = e;
+                if (best != null)
+                    NamedEntities[g.Key] = best;
+            }
+        }
+
+        /// <summary>Puts back what a name found (an undone renumbering): <paramref name="entity"/>, or nothing.</summary>
+        internal void SetNamed(string name, T? entity)
+        {
+            if (entity == null)
+                NamedEntities.Remove(name);
+            else
+                NamedEntities[name] = entity;
+        }
+
         /// <summary>Whether a number is taken in the set.</summary>
         internal bool Has(int id) => Entities.ContainsKey(id);
 

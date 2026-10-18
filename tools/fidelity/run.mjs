@@ -479,6 +479,55 @@ if (opt.stages.includes(6)) {
 			if (changed.length) check.record('CHANGED', changed.map((k) => `${k} ${JSON.stringify(base[k])} -> ${JSON.stringify(counts[k])}`).join('; '), c.name + ' (counts)');
 		}
 	})));
+
+	// Renumbers (docs/RENUMBER.md): Dom5Tests renumber moves a mod's own numbers to blocks from the
+	// start numbers, saves it as the editor saves (it must read back the same) and checks undo and
+	// redo byte for byte; gameread.py --merge reads the save as a one-part merge. The mod's image
+	// folders are linked next to the save, so the referee finds its sprites as the game would.
+	const renumbers = (SUITE.renumbers || []).filter((c) => (!opt.quick || !c.slow) && (!opt.only || c.name.includes(opt.only)));
+	await runChecks(renumbers.map((c) => new Check(6, c.name, async (check) => {
+		const file = resolve(c.mod);
+		if (!fs.existsSync(file)) return check.record('SKIP', 'not installed here: ' + path.basename(file));
+		const dir = path.join(WORK, c.name);
+		fs.rmSync(dir, { recursive: true, force: true });
+		fs.mkdirSync(dir, { recursive: true });
+		for (const sub of fs.readdirSync(path.dirname(file), { withFileTypes: true }).filter((d) => d.isDirectory()))
+			fs.symlinkSync(path.join(path.dirname(file), sub.name), path.join(dir, sub.name), 'junction');
+		const out = path.join(dir, c.name + '.dm');
+		const json = path.join(dir, c.name + '.check.json');
+		const args = ['renumber', file, out, ...Object.entries(c.starts).flatMap(([k, n]) => ['--start', `${k}=${n}`])];
+		if (c.gameNumbers) args.push('--game-numbers');
+		for (const w of c.with || []) args.push('--with', forTests(resolve(w)));
+		args.push('--json', json);
+		const r = await dom5tests(args);
+		if (!fs.existsSync(json)) throw new Error('Dom5Tests renumber failed: ' + lastLines(r.out, 3));
+		const m = JSON.parse(fs.readFileSync(json, 'utf8'));
+		const gjson = path.join(dir, c.name + '.game.json');
+		const g = await run(process.env.PYTHON || 'python3', [path.join(ROOT, 'tools/dom6exe/gameread.py'), '--merge', out, '--show', '3', '--json', gjson]);
+		if (g.code !== 0 && g.code !== 1) throw new Error('gameread --merge failed: ' + lastLines(g.out, 3));
+		const gr = JSON.parse(fs.readFileSync(gjson, 'utf8'));
+		const problems = [];
+		if (!m.undo) problems.push('undo differs from the unedited save');
+		if (!m.redo) problems.push('redo differs from the save');
+		if (r.code !== 0 && m.undo && m.redo) problems.push('Dom5Tests renumber: ' + lastLines(r.out, 2));
+		if (gr.differences) problems.push(`the game reads it differently from the mod: ${gr.differences}`);
+		if (gr.chain) problems.push(`${gr.chain} chained unit(s) out of order`);
+		if (problems.length)
+			for (const l of g.out.trim().split('\n').slice(1, 7)) check.note(l.trim());
+		const kinds = Object.entries(m.movedByKind).map(([k, n]) => `${n} ${k}`).join(', ');
+		check.record(problems.length ? 'FAIL' : 'PASS', problems.join('; ') ||
+			`${m.moved} moved${kinds ? ' (' + kinds + ')' : ''}, ${m.linesChanged} lines changed (${m.linesBefore} -> ${m.linesAfter}); undo and redo byte for byte; the game reads it as the mod`);
+		const counts = { moved: m.moved, movedByKind: m.movedByKind, onGameNumbers: m.onGameNumbers, notes: m.notes,
+			linesChanged: m.linesChanged, lines: [m.linesBefore, m.linesAfter], referee: gr.known };
+		const base = path.join(BASELINES, `${c.name}.stage6.json`);
+		if (opt.update) fs.writeFileSync(base, JSON.stringify(counts, null, 1) + '\n');
+		else if (!fs.existsSync(base)) check.record('NEW', 'no baseline yet; run with --update-baselines', c.name + ' (counts)');
+		else {
+			const was = JSON.parse(fs.readFileSync(base, 'utf8'));
+			const changed = Object.keys(counts).filter((k) => JSON.stringify(counts[k]) !== JSON.stringify(was[k]));
+			if (changed.length) check.record('CHANGED', changed.map((k) => `${k} ${JSON.stringify(was[k])} -> ${JSON.stringify(counts[k])}`).join('; '), c.name + ' (counts)');
+		}
+	})));
 }
 
 // --- summary ------------------------------------------------------------------

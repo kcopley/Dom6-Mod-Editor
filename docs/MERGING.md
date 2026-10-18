@@ -3,6 +3,10 @@
 Assessment of 2026-10-07 (the user: "possibly coming back to how mods can be merged together").
 Nothing here is built yet; "measured" means it was tried.
 
+The Renumber tool (docs/RENUMBER.md, 2026-10-18) moves one mod's own numbers to blocks the author
+picks, with the merger's moves (`Renumbering.MoveAll`) and its runs of units that go by each
+other's numbers (`ModMerger.Runs`); the referee checks it as a one-part merge.
+
 ## What the game does with several mods
 
 The game reads enabled mods one after another, in the order they were enabled, all 15 passes

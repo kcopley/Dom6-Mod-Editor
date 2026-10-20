@@ -5,7 +5,20 @@ An editor for Dominions 6 mod files (.dm): browse the game's own data and a mod'
 entity with real panels, build event chains, and save back without disturbing lines you
 didn't change.
 
-New in this build (fixes)
+New in this build
+- Renumber: "Renumber..." on the toolbar moves the units, weapons, armor and sites a mod numbers
+  itself to blocks you choose. It lists how many of each the mod has and the numbers they use
+  now; type a start number for each type to move, and the new numbers show as you type. They
+  are packed from the start in their order, around numbers the game, a mod this one needs, or a
+  line that refers to them already uses; units that turn into the next number stay next to it.
+  Every line that refers to a moved number follows, names written with their number
+  ("Militia (8100)") too, and only the number changes in a line. It's one edit of the open mod:
+  Undo puts it back, and saving is the usual save (a backup first). A move that would change
+  what a name in the mod finds in game isn't made. Mods that need the mod (its submods) aren't
+  changed.
+- #req_pretismnr and #req_targrealmnr are read as units (they follow a renumber or a merge).
+
+In 0.13.1 (fixes)
 - Mercenaries: the commander, unit and item a band offers are saved as names, as the game reads
   them (#com "Militia"; "Militia (30)" when another monster has the same name). Picking one
   wrote its number, which the game doesn't read: for a commander or unit it stops loading the
@@ -97,6 +110,8 @@ Using it
 - Ctrl+P: go to anything by name or ID. Ctrl+F: search the list (for events, also the message
   text). Hover anything for what it does.
 - Validate checks the mod as it is now and opens the report.
+- Merge mods... puts several mods into one new file; Renumber... moves the open mod's own
+  numbers to blocks you choose (one edit: Undo puts it back).
 - Mods from the Steam workshop: Steam replaces those files when the mod updates, so the editor
   asks before saving there. Save a copy in your Dominions 6 mods folder instead.
 

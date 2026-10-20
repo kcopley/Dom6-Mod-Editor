@@ -34,6 +34,8 @@ uses, a start number per type; the usual saving with its backups alongside. docs
   game reads each as the mod (one known kind on Confluence: an unclosed `#descr` over a
   rewritten line). The window, headless (`--renumber-window`), saves the command line's file
   byte for byte.
+- **Test build 0.14.0** (2026-10-20; the user: "let's make a 14.0 build"): Renumber... and the
+  two event references; Windows, macOS (arm64, x64), Linux (x64, arm64) in publish/.
 
 ## 2026-10-11: the Legendary mods (six event-heavy mods by one author), edits checked end to end
 
